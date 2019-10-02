@@ -1,22 +1,55 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (C) 2019 Integrity Solutions
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package com.is2300.rcp;
 
 import com.is2300.cmdlineparser.CmdLineParser;
+import com.is2300.rcp.enums.SysExits;
 import com.is2300.rcp.printer.Printer;
 import java.io.File;
+import java.time.LocalDate;
 
 /**
  *
  * @author Sean Carrick &lt;sean at carricktrucking dot com&gt;
+ *
+ * @version 0.23.384
+ * @since 0.1.0
  */
 public class StartPrinting {
-    public static final int MAJOR = 0;
-    public static final int MINOR = 1;
-    public static final int BUILD = 1;
+    public static final int MAJOR;
+    public static final int MINOR;
+    public static final int BUILD;
+    
+    static {
+        BUILD  = -1 * ((int)System.currentTimeMillis() / 5000000);
+        
+        LocalDate ld = LocalDate.now();
+        int minor = ld.getMonthValue() + ld.getYear() + ld.getDayOfMonth()
+                + ld.getDayOfYear();
+        minor /= 100;
+        
+        if ( minor > 99 ) {
+            minor = 1;
+        }
+        
+        MINOR = minor;
+        
+        MAJOR = BUILD / (MINOR * 100);
+    }
 
     /**
      * @param args the command line arguments
@@ -25,33 +58,52 @@ public class StartPrinting {
         // Use CmdLineParser library to parse the arguments.
         CmdLineParser parser = new CmdLineParser(args);
         
-        if ( parser.isSwitchPresent("-h") 
+        if ( parser.isSwitchPresent("-c") 
+                || parser.isSwitchPresent("--conditions") ) {
+            showConditions();
+        } else if ( (parser.isSwitchPresent("-d") 
+                || parser.isSwitchPresent("--dir")) 
+                && (parser.isSwitchPresent("-f") 
+                || parser.isSwitchPresent("--filter")) ) {
+            Printer.print(parser.getSwitchValue(parser.getArgument(0)),
+                    parser.getSwitchValue(parser.getArgument(1)));
+        } else if ( parser.isSwitchPresent("-h") 
                 || parser.isSwitchPresent("--help") ) {
-            showHelp();
+            showHelp(SysExits.EX_OK);
         } else if ( parser.isSwitchPresent("-v") 
                 || parser.isSwitchPresent("--version") ) {
             showVersion();
-        } else if ( parser.isSwitchPresent("-f") 
-                || parser.isSwitchPresent("--folder") ) {
-//            Printer.print(new File(parser.getSwitchValue(parser.getArgument(0))));
-            File file = new File(parser.getSwitchValue(parser.getArgument(0)));
-            System.out.println(file.getAbsolutePath());
+        } else if ( parser.isSwitchPresent("-w") 
+                || parser.isSwitchPresent("--warranty") ) {
+            showWarranty();
+        } else {
+            showHelp(SysExits.EX_USAGE);
         }
     }
     
-    static void showHelp() {
+    static void showHelp(SysExits exitStatus) {
         System.out.println("Recursive Code Printer (ISRCP)");
         System.out.println("-".repeat(30));
         System.out.println("Copyright (C) 2019 Integrity Solutions");
         System.out.println("\tVersion " + MAJOR + "." + MINOR + "." + BUILD);
+        System.out.println("\nLICENCE:\nThis program comes with ABOSLUTELY NO "
+                + "WARRANTY; for details type `-w'");
+        System.out.println(" or `-warranty'.");
+        System.out.println("This is free software, and you are welcome to "
+                + "reditribute it");
+        System.out.println("under certain conditions; type `-c` or `-conditions'"
+                + " for details.");
         System.out.println("\n");
         System.out.println("-".repeat("USAGE".length()));
         System.out.println("USAGE");
         System.out.println("-".repeat("USAGE".length()));
         System.out.println();
+        System.out.println("\t-c | --conditions\tShow conditions details");
+        System.out.println("   -f path | --folder path\tThe folder to process");
         System.out.println("\t-h | --help\t\tShow this help and exit");
         System.out.println("\t-v | --version\t\tShow program version and exit");
-        System.out.println("   -f path | --folder path\tThe folder to process");
+        System.out.println("\t-w | --waranty\t\tShow warranty details");
+        System.out.println("\t-x | --extension\tExtension of the files to print");
         System.out.println("\n");
         System.out.println("-".repeat("EXAMPLE".length()));
         System.out.println("EXAMPLE");
@@ -76,13 +128,7 @@ public class StartPrinting {
                 + "\"src\", but this is not a requirement.");
         System.out.println("\n\n");
         
-        exit(0);
-    }
-    
-    public static void exit(int status) {
-        System.out.println("Thank you for using Integrity Solutions' Recursive "
-                + "Code Printer utility...\n");
-        System.exit(status);
+        exit(exitStatus);
     }
     
     public static void showVersion() {
@@ -92,7 +138,53 @@ public class StartPrinting {
         System.out.println("\tVersion " + MAJOR + "." + MINOR + "." + BUILD);
         System.out.println("\n");
         
-        exit(0);
+        exit(SysExits.EX_OK);
     }
     
+    public static void showWarranty() {
+        System.out.println("15. Disclaimer of Warranty.");
+        System.out.println();
+        System.out.println("THERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT PERMITTED BY");
+        System.out.println("APPLICABLE LAW.  EXCEPT WHEN OTHERWISE STATED IN WRITING THE COPYRIGHT");
+        System.out.println("HOLDERS AND/OR OTHER PARTIES PROVIDE THE PROGRAM \"AS IS\" WITHOUT WARRANTY");
+        System.out.println("OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO,");
+        System.out.println("THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR");
+        System.out.println("PURPOSE.  THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE PROGRAM");
+        System.out.println("IS WITH YOU.  SHOULD THE PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF");
+        System.out.println("ALL NECESSARY SERVICING, REPAIR OR CORRECTION.");
+        System.out.println();
+        System.out.println("16. Limitation of Liability.");
+        System.out.println();
+        System.out.println("IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING");
+        System.out.println("WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MODIFIES AND/OR CONVEYS");
+        System.out.println("THE PROGRAM AS PERMITTED ABOVE, BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY");
+        System.out.println("GENERAL, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE");
+        System.out.println("USE OR INABILITY TO USE THE PROGRAM (INCLUDING BUT NOT LIMITED TO LOSS OF");
+        System.out.println("DATA OR DATA BEING RENDERED INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD");
+        System.out.println("PARTIES OR A FAILURE OF THE PROGRAM TO OPERATE WITH ANY OTHER PROGRAMS),");
+        System.out.println("EVEN IF SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF");
+        System.out.println("SUCH DAMAGES.");
+        System.out.println();
+        System.out.println("Interpretation of Sections 15 and 16.");
+        System.out.println();
+        System.out.println("If the disclaimer of warranty and limitation of liability provided");
+        System.out.println("above cannot be given local legal effect according to their terms,");
+        System.out.println("reviewing courts shall apply local law that most closely approximates");
+        System.out.println("an absolute waiver of all civil liability in connection with the");
+        System.out.println("Program, unless a warranty or assumption of liability accompanies a");
+        System.out.println("copy of the Program in return for a fee.\n");
+        
+        exit(SysExits.EX_OK);
+    }
+    
+    public static void showConditions() {
+        
+    }
+    
+    public static void exit(SysExits status) {
+        System.out.println("Thank you for using Integrity Solutions' Recursive "
+                + "Code Printer utility...\n");
+        System.exit(status.toInt());
+    }
+
 }

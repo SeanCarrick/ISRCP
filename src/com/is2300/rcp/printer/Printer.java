@@ -24,7 +24,7 @@ import java.io.File;
  * @author Sean Carrick &lt;sean at carricktrucking dot com&gt;
  * 
  * @version 0.1.0
- * @since 0.1.0
+ * @since 0.23.384
  */
 public class Printer {
     //<editor-fold defaultstate="collapsed" desc="Public Static Constants">
@@ -54,13 +54,48 @@ public class Printer {
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Public Static Methods">
-    public static boolean print(File toPrint) {
+
+    /**
+     * This method handles the necessary work for printing the files.
+     * 
+     * @param toPrint   The folder which contains the files to be printed.
+     * @param extension The extension of the files to be printed, so that only
+     *                  the desired files are printed, and not everything in the
+     *                  folder.
+     * @return          {@code true} on success; {@code false} otherwise.
+     * @throws NullPointerException if the pathname argument is null.
+     */
+    public static boolean print(String pathToFiles, String extension) {
+        if ( pathToFiles == null ) {
+            throw new NullPointerException("The path cannot be null.");
+        }
         
+        File file = new File(pathToFiles);
+        
+        if ( file.isDirectory() ) {
+            for ( File f : file.listFiles() ) {
+                if ( f.isDirectory() ) {
+                    print(f.getAbsolutePath(), extension);
+                } else {
+                    boolean printed = printFiles(f.getParentFile().listFiles());
+                }
+            }
+        }
         
         return true;
     }
     //</editor-fold>
-
+    
+    //<editor-fold defaultstate="collapsed" desc="Private Static Methods">
+    private static boolean printFiles(File[] files) {
+        for ( File file : files ) {
+            System.out.println(file.getAbsolutePath());
+        }
+        
+        return true;
+    }
+    //</editor-fold>
+    
     //<editor-fold defaultstate="collapsed" desc="Public Instance Methods">
     
     //</editor-fold>
