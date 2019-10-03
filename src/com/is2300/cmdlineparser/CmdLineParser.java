@@ -155,8 +155,10 @@ public class CmdLineParser {
              * elements left in the list we are going to create from our args
              * variable, so the second loop will not run.
              */
-            ArrayList<String> arguments = new ArrayList<>(Arrays.asList(args));
+            List<String> arguments = new ArrayList<>(Arrays.asList(args));
+            List<String> argList = new ArrayList<>();
             String key = null;
+            boolean keyFound = false;
             
             /*
                 for each arg in arguments
@@ -170,7 +172,17 @@ public class CmdLineParser {
                             continue loop
                 
             */
-            
+            for ( String arg : arguments ) {
+                if ( arg.startsWith("-") && key == null ) {
+                    key = arg;
+                } else if ( !arg.startsWith("-") ) {
+                    argList.add(arg);
+                } else {
+                    switches.put(key, argList);
+                    key = arg;
+                    argList.clear();
+                }
+            }
         }
         
         return this.switches;
