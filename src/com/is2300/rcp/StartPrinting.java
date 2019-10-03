@@ -18,13 +18,78 @@ package com.is2300.rcp;
 
 import com.is2300.cmdlineparser.CmdLineParser;
 import com.is2300.rcp.enums.SysExits;
-import com.is2300.rcp.printer.FileFilterFactory;
-import com.is2300.rcp.printer.Printer;
-import java.io.FileFilter;
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
 /**
- *
+ * ***Integrity Solutions*** *Recursive Code Printer Utility* is designed from 
+ * the ground up to be a useful tool for developers who desire to generate a
+ * hard-copy of their project's source code for copyright purposes. Integrity
+ * Solutions deemed it necessary to create this utility to provide a less painful
+ * way to generate that hard-copy.
+ * 
+ * In our experience, there are not many, if any, Integrated Development
+ * Environments (IDEs) that provide a method in which the source files for an
+ * entire project tree can be printed as a single print job. This has caused 
+ * many developers to forego the important task of copyrighting their source
+ * code and, thereby, protecting their intellectual property rights. This seemed
+ * to be a problem that needed a quality solution.
+ * 
+ * This is where our *Recursive Code Printer Utility* comes into play. This is
+ * not, by any stretch of the imagination, a pretty utility to use, but it is
+ * very effective and efficient. One must drop to the command line to use this
+ * utility, but it works well and it works quickly. Since it is an Open Source
+ * project, we don't mind showing you how the heart of this utility works:
+ * 
+ * ```java
+ *     public static boolean print(String pathToFiles, FileFilter filter) {
+ *         if ( pathToFiles == null ) {
+ *             throw new NullPointerException("The path cannot be null.");
+ *         }
+ *       
+ *         boolean printed = false;
+ *         File file = new File(pathToFiles);
+ *       
+ *         if ( file.isDirectory() ) {
+ *             for ( File f : file.listFiles(filter) ) {
+ *                 if ( f.isDirectory() ) {
+ *                     print(f.getAbsolutePath(), filter);
+ *                 } else {
+ *                     printed = printFile(f);
+ *                     printCount++;
+ *                 }
+ *             }
+ *         } else { 
+ *             printed = printFile(file);
+ *         }
+ *       
+ *         return printed;
+ *     }
+ * ```
+ * 
+ * The above code is the heart of the ***ISRCP***. It provides a recursive way
+ * of generating all source code files in the given path to hard copy. The main
+ * method in this class will tell you exactly how many files were processed and
+ * exactly how many seconds it took to process them. Run this utility against
+ * any of your source trees and you will be impressed by the functionality and
+ * the performance. When we ran this utility during testing against a small 
+ * project of 25 folder and 500 source files, the program exited in less than
+ * 25 seconds, having processed every file in the tree and sent it to the 
+ * printer. Unfortunately, printers being what they are, it took approximately
+ * 3 hours for all of the printouts to complete, but we have no control over 
+ * that aspect of the process. At least we didn't have to sit there and print
+ * each and every one of those 500 files individually! That would have probably
+ * taken one person about 2 or 3 days to get all of the files printed. And, 
+ * worse, they may have missed one or two because of their eyes going crossed
+ * due to clicking four or five times just to generate 1 printout. When you 
+ * multiply that by the number of files, that's a minimum of 2,000 clicks just
+ * to create printouts of each file. The hand cramps would be awful!
+ * 
+ * All of this is just a way to say that we hope and pray that you find this
+ * utility useful with printing out your development projects!
+ * 
  * @author Sean Carrick &lt;sean at carricktrucking dot com&gt;
  *
  * @version 0.23.384
@@ -34,7 +99,9 @@ public class StartPrinting {
     public static final int MAJOR;
     public static final int MINOR;
     public static final int BUILD;
-    private static final String[] langs;
+    public static final String WARRANTY;
+    public static final Properties PROPS;
+    private static final String[] LANGS;
     
     static {
         BUILD  = -1 * ((int)System.currentTimeMillis() / 5000000);
@@ -51,8 +118,25 @@ public class StartPrinting {
         MINOR = minor;
         
         MAJOR = BUILD / (MINOR * 100);
-
-        langs = new String[]{"Ada Body", "Ada Spec", "Arduino / Nano Sketch",
+        
+        StringBuilder sb = new StringBuilder();
+        sb.append("Copyright (C) 2019 Integrity Solutions\n\n");
+        sb.append("This program is free software: you can redistribute it and/or modify ");
+        sb.append("it under the terms of the GNU General Public License as published by ");
+        sb.append("the Free Software Foundation, either version 3 of the License, or ");
+        sb.append("(at your option) any later version.");
+        sb.append("\n");
+        sb.append("This program is distributed in the hope that it will be useful, ");
+        sb.append("but WITHOUT ANY WARRANTY; without even the implied warranty of ");
+        sb.append("MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the ");
+        sb.append("GNU General Public License for more details.");
+        sb.append("\n");
+        sb.append("You should have received a copy of the GNU General Public License ");
+        sb.append("along with this program.  If not, see <http://www.gnu.org/licenses/>.");
+        
+        WARRANTY = sb.toString();
+        
+        LANGS = new String[]{"Ada Body", "Ada Spec", "Arduino / Nano Sketch",
                 "ASP", "ASP.Net", "Bash Scripting", "BASIC", "Batch Files",
                 "C", "Objective C", "C++", "C#", "CGI", "Cold Fusion", 
                 "Digital Mars", "Erlang", "Flash", "Flash/Flex Action",
@@ -60,6 +144,20 @@ public class StartPrinting {
                 "MetaTrader", "Perl", "PHP", "Python", "Python Notebook",
                 "R", "Ruby", "Ruby on Rails", "SSL", "TCL", "Unreal Script",
                 "VB.net", "Visual Basic", "XML"};
+        
+        PROPS = new Properties();
+        
+        /*File propsFile = new File(System.getProperty("user.home") 
+                + System.getProperty("file.separator") + ".isrcp.conf");
+        try (InputStream is = new FileInputStream(propsFile)) {
+            PROPS.load(is);
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(StartPrinting.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(StartPrinting.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        */
+        
     }
 
     /**
@@ -69,7 +167,14 @@ public class StartPrinting {
         // Use CmdLineParser library to parse the arguments.
         CmdLineParser parser = new CmdLineParser(args);
         
-        if ( parser.isSwitchPresent("-c") 
+        Map<String, List<String>> testMap = parser.getSwitches();
+        
+        for ( Map.Entry<String, List<String>> key : testMap.entrySet() ) {
+            System.out.println("Key = " + key.getKey() + "\nValue = " 
+                    + key.getValue());
+        }
+        
+/*        if ( parser.isSwitchPresent("-c") 
                 || parser.isSwitchPresent("--conditions") ) {
             
             showConditions();
@@ -78,12 +183,16 @@ public class StartPrinting {
                 || parser.isSwitchPresent("--dir")) 
                 && (parser.isSwitchPresent("-f") 
                 || parser.isSwitchPresent("--filter")) ) {
+            long start = System.currentTimeMillis();
             
             FileFilter filter = FileFilterFactory.createFileFilter(
                     parser.getSwitchValue(parser.getArgument(2)));
-            Printer.print(parser.getSwitchValue(parser.getArgument(0)), filter);
+            PrintSetup.print(parser.getSwitchValue(parser.getArgument(0)), filter);
             
-            System.out.println("Number of files printed: " + Printer.getPrintCount());
+            long finish = System.currentTimeMillis();
+            long totalTime = (finish - start) / 1000;
+            System.out.println("Number of files printed: " + 
+                    PrintSetup.getPrintCount() + " in " + totalTime + " seconds");
             
         } else if ( parser.isSwitchPresent("-h") 
                 || parser.isSwitchPresent("--help") ) {
@@ -100,10 +209,15 @@ public class StartPrinting {
             
             showWarranty();
             
+        } else if ( parser.isSwitchPresent("-g") 
+                || parser.isSwitchPresent("--gui") ) {
+            
+            RcpFrame.main(args);
+            
         } else {
             showHelp(SysExits.EX_USAGE);
         }
-    }
+*/    }
     
     static void showHelp(SysExits exitStatus) {
         System.out.println("Recursive Code Printer (ISRCP)");

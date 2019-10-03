@@ -17,28 +17,32 @@
 
 package com.is2300.rcp.printer;
 
-import java.io.File;
-import java.io.FileFilter;
+import java.awt.Graphics;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.print.PageFormat;
+import java.awt.print.Printable;
+import java.awt.print.PrinterException;
 
 /**
  *
  * @author Sean Carrick &lt;sean at carricktrucking dot com&gt;
  * 
  * @version 0.1.0
- * @since 0.23.384
+ * @since 0.1.0
  */
-public class Printer {
+public class Printer implements Printable, ActionListener {
     //<editor-fold defaultstate="collapsed" desc="Public Static Constants">
     
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Private Member Fields">
-    private static int printCount;
+    
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Static Initializer">
     static {
-        printCount = 0;
+        
     }
     //</editor-fold>
 
@@ -49,70 +53,52 @@ public class Printer {
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Constructor(s)">
-    private Printer () {
+    public Printer () {
         
     }
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Public Static Methods">
+    
+    //</editor-fold>
 
-    /**
-     * This method handles the necessary work for printing the files.
-     * 
-     * @param toPrint   The folder which contains the files to be printed.
-     * @param filter The extension of the files to be printed, so that only
-     *                  the desired files are printed, and not everything in the
-     *                  folder.
-     * @return          {@code true} on success; {@code false} otherwise.
-     * @throws NullPointerException if the pathname argument is null.
-     */
-    public static boolean print(String pathToFiles, FileFilter filter) {
-        if ( pathToFiles == null ) {
-            throw new NullPointerException("The path cannot be null.");
-        }
-        
-        boolean printed = false;
-        File file = new File(pathToFiles);
-        
-        if ( file.isDirectory() ) {
-            for ( File f : file.listFiles(filter) ) {
-                if ( f.isDirectory() ) {
-                    print(f.getAbsolutePath(), filter);
-                } else {
-                    printed = printFile(f);
-                    printCount++;
-                }
-            }
-        } else { 
-            printed = printFile(file);
-        }
-        
-        return printed;
-    }
-    //</editor-fold>
-    
-    //<editor-fold defaultstate="collapsed" desc="Private Static Methods">
-    private static boolean printFiles(File[] files) {
-        for ( File file : files ) {
-            System.out.println(file.getAbsolutePath());
-        }
-        
-        return true;
-    }
-    
-    private static boolean printFile(File file) {
-        System.out.println(file.getAbsolutePath());
-        
-        return true;
-    }
-    
-    public static int getPrintCount() {
-        return printCount;
-    }
-    //</editor-fold>
-    
     //<editor-fold defaultstate="collapsed" desc="Public Instance Methods">
+    /**
+     * Prints the page at the specified index into the specified `Graphics`
+     * context in the specified format. A `PrinterJob` calls the 
+     * `Printable` interface to request that a page be rendered into the context
+     * specified by `graphics`. The format of the page to be drawn is
+     * specified by `pageFormat`. The zero based index of the requested
+     * page is specified by `pageIndex`. If the requested page does not
+     * exist then this method returns `NO_SUCH_PAGE`; otherwise `PAGE_EXISTS` is 
+     * returned. The `Graphics` class or subclass implements the 
+     * `PrinterGraphics` interface to provide additional information. If the 
+     * `Printable` object aborts the print job then it throws a 
+     * `PrinterException`.
+     * 
+     * @param graphics the context into which the page is drawn
+     * @param pageFormat the size and orientation of the page being drawn
+     * @param pageIndex the zero based index of the page to be drawn
+     * @return PAGE_EXISTS if the page is rendered successfully or `NO_SUCH_PAGE`
+     * if `pageIndex` specifies a non-existent page.
+     * @throws PrinterException - thrown when the print job is terminated.
+     */
+    @Override
+    public int print(Graphics graphics, PageFormat pageFormat, int pageIndex) throws PrinterException {
+        //TODO: handle print
+        
+        return 0;
+    }
     
+    /**
+     * Invoked when an action occurs.
+     * 
+     * @param e the event to be processed
+     */
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        // TODO: handle action.
+    }
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Private Instance Methods">
