@@ -172,15 +172,27 @@ public class CmdLineParser {
                             continue loop
                 
             */
+            int counter = 1;
             for ( String arg : arguments ) {
                 if ( arg.startsWith("-") && key == null ) {
                     key = arg;
                 } else if ( !arg.startsWith("-") ) {
                     argList.add(arg);
+                    counter++;
                 } else {
-                    switches.put(key, argList);
+                    List<String> tmp = new ArrayList<>();
+                    tmp.addAll(argList);
+                    switches.put(key, tmp);
                     key = arg;
+                    if ( ++counter >= args.length ) {
+                        break;
+                    }
                     argList.clear();
+                }
+                
+                if ( counter >= args.length ) {
+                    // Add the final list to the map.
+                    switches.put(key, argList);
                 }
             }
         }
