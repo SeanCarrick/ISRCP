@@ -64,7 +64,7 @@ package com.is2300.rcp.enums;
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- *	@(#)sysexits.h	8.1 (Berkeley) 6/2/93
+ *	&#0041;(#)sysexits.h	8.1 (Berkeley) 6/2/93
  * </pre>
  *
  * @author Original {@code sysexits.h} Authors (unlisted)
@@ -190,8 +190,10 @@ public enum SysExits {
     final Integer Status;
 
     /**
-     * Allow this enum to convert itself to an Integer.  Must be called to use these enums
-     * as integers in tests or System.exit() calls.
+     * Allow this enum to convert itself to an Integer.  Must be called to use 
+     * these enums as integers in tests or System.exit() calls.
+     * 
+     * @return int - the value of the enum.
      */
     public int toInt() {
         return Status;

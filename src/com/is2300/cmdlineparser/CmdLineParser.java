@@ -17,47 +17,72 @@
 
 package com.is2300.cmdlineparser;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.TreeSet;
+import org.apache.commons.lang3.ArrayUtils;
 
 /**
- * {@code CLArguments} is a library for parsing command line arguments in an 
- * easy, intelligible and efficient manner. This parser breaks down the 
- * difference between switches and targets. Switches are typically single letter
- * options that are prefixed with a single dash (-) or, word or multi-word 
- * options that are prefixed with a double dash (--). Targets are the parameters
- * to the switches.
- * <p> For example, if your program requires a flag for debugging, you would 
- * provide a single {@code boolean} switch that takes no parameters, such as
- * {@code -d} or {@code --debug}. Your program would then simply check if that
- * switch was present, which would equate to {@code debugging = true}, or not,
- * which would equate to {@code debugging = false}.</p>
- * <p>Alternatively, if the 
- * debugging flag is present, you may want to set a debugging level for verbosity
- * of output. In that use case, your program could check for the existence of 
- * the debugging flag (above) and, if it exists, check for the debugging level,
- * which could be {@code --debugging-level 2} for a medium verbosity output. In
- * this instance, the switch is {@code --debugging-level} and the target is 2.
- * </p>
- * <p>This works for any type of switch and target. You can even have targets
- * with no switches or multiple targets for each switch. If you need targets 
- * without a switch, those targets should be listed first on the command line,
- * as this library interprets all targets following a switch as belonging to 
- * that switch, up to the next switch on the command line.</p>
- * <p>Also, you can use this library to populate fields in your custom classes,
- * provided you name your fields the same as the command line switch that gathers
- * the data for those fields.</p>
- * <p>This project is located on GitHub at https://github.com/SeanCarrick/CLArgParser
- * .</p>
+ * `CmdLineParser` is a library class for parsing command line arguments in a
+ * simple and elegant manner. This parser breaks down the difference between
+ * switches, options and targets. These terms are defined, for this library, as
+ * follows:
+ * 
+ * <dl>
+ *      <dt>switch</dt>
+ *      <dd>A `switch` is any option to the program that is set on the command
+ *          line and is typically preceded with a single dash (-) for 
+ *          single-letter options, or a double dash (--) for whole word options. 
+ *          If the whole word option is used, there can be multiple words in the 
+ *          switch name, typically hyphen separated, such as `--multi-word-option`
+ *      </dd>
+ *      <dt>option</dt>
+ *      <dd>An `option` is typically a value that a switch denotes, such as
+ *          `--port 8080`. In this example, the switch is `--port` and the 
+ *          option is `8080`. For `CmdLineParser` library, you may have multiple
+ *          options to a switch. Using the previous example of setting a port,
+ *          you could specify alternate ports in the event that the first port
+ *          is already in use. You would accomplish this by doing:
+ * 
+ *          `--port 8080 8585 9090`
+ *          
+ *          In this example, if port 8080 is already in use, your application
+ *          could move on to the first alternate port, 8585, and the final 
+ *          alternate port, 9090, each time your program discovers the provided
+ *          port is already in use.
+ * 
+ *          We are able to have this feature available because, internally, we
+ *          use the switch as the key and all options up until the next switch
+ *          as the values for the key. This allows you to allow multiple options
+ *          for any switches your program requires.</dd>
+ *      <dt>target</dt>
+ *      <dd>A `target` is any option to your program that has no associated
+ *          switch. If your program requires any information from the command
+ *          line that you don't want to assign switches to, this information
+ *          needs to be provided before any switches. 
+ * 
+ *          However, another alternative would be to just have a generic switch, 
+ *          such as `-t`, with no whole word option as the switch for your 
+ *          targets. Obviously, if your program already uses the switch 
+ *          exemplified above for a specific feature, you could use any switch 
+ *          that doesn't already have an association for your program. 
+ * 
+ *          Furthermore, you could even just assign `-` as your target switch, 
+ *          with no letter associated with it. If you take this option, make sure 
+ *          your help documentation specifies that the user make sure they place 
+ *          a space between the dash (-) and the target(s) they are passing into 
+ *          your program. If the user uses the dash and does not put a space 
+ *          after it, and before their first target, then `-target_name` will be 
+ *          interpreted as a switch and all following targets will be assigned 
+ *          to this key.</dd>
+ * </dl>
  * 
  * @author Sean Carrick &lt;sean at carricktrucking dot com&gt;
  * 
- * @version 0.1.0
+ * @version 0.3.152
  * @since 0.1.0
  */
 public class CmdLineParser {
@@ -67,339 +92,89 @@ public class CmdLineParser {
 
     //<editor-fold defaultstate="collapsed" desc="Private Member Fields">
     private String[] args;                          // Default to null
-    private HashMap<String, Integer> switchIndices; // Default to null
-    private TreeSet<Integer> takenIndices;          // Default to null
+    private Map<String, List<String>> switches;
     private List<String> targets;                   // Default to null
-    //</editor-fold>
-
-    //<editor-fold defaultstate="collapsed" desc="Static Initializer">
-    static {
-        
-    }
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Intstance Initializer">
     {
         args = null;
-        switchIndices = new HashMap<>();
-        takenIndices = new TreeSet<>();
+        switches = new HashMap<>();
         targets = new ArrayList<>();
     }
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Constructor(s)">
     /**
-     * Creates an instance of the {@code CLArguments} class to parse command
-     * line arguments into something useful.
+     * Creates an instance of the `CmdLineParser` class to parse command line
+     * arguments into a form that is easier to use throughout your program.
      * 
-     * @param args The command line argument passed into the implementing program.
+     * @param args The command line argument passed into the implementing 
+     *             program.
      */
     public CmdLineParser(String[] args) {
-        parse(args);
+        this.switches = parse(args);
     }
-    //</editor-fold>
-
-    //<editor-fold defaultstate="collapsed" desc="Public Static Methods">
-    
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Public Instance Methods">
-    /**
-     * Parse the arguments into a more useful format.
-     * 
-     * @param arguments The command line arguments given to the calling program.
-     */
-    public void parse(String[] arguments) {
-        this.args = arguments;
-        
-        switchIndices.clear();
-        takenIndices.clear();
-        
-        int idx = 0;
-        
-        for ( String str : args ) {
-            if ( str.startsWith("-") ) {
-                switchIndices.put(str, idx);
-                takenIndices.add(idx);    // Use then increment idx.
-            }
-            idx++;
-        }
-    }
     
-    /**
-     * Retrieves the array of arguments that are stored in this object.
-     * 
-     * @return The command line arguments.
-     */
-    public String[] getArguments() {
-        return args;
-    }
-    
-    /**
-     * Retrieves the argument at the given index in the argument array.
-     * 
-     * @param idx   The index from which to get the argument.
-     * @return      The argument stored at the provided index.
-     */
-    public String getArgument(int idx) {
-        return args[idx];
-    }
-    
-    /**
-     * Checks to see if the given switch is present in the command line arguments.
-     * 
-     * @param switchName    The command line switch to check for.
-     * @return              {@code true} if the switch is present; {@code falcse}
-     *                      otherwise.
-     */
-    public boolean isSwitchPresent(String switchName) {
-        return switchIndices.containsKey(switchName);
-    }
-    
-    /**
-     * Retrieve the value from the given switch.
-     * 
-     * @param switchName    The switch for which to retrieve the value.
-     * @return              The value of the given switch.
-     */
-    public String getSwitchValue(String switchName) {
-        return getSwitchValue(switchName, null);
-    }
-    
-    /**
-     * Retrieves the value for the given switch, or the default value if the
-     * given switch is not found.
-     * 
-     * @param switchName    The switch for which value is wanted.
-     * @param defaultValue  A default value in the event the switch is not
-     *                      present.
-     * @return              The value, if the switch is present; the supplied
-     *                      default value if the switch was not found.
-     */
-    public String getSwitchValue(String switchName, String defaultValue) {
-        if ( !switchIndices.containsKey(switchName) ) {
-            return defaultValue;
-        }
-        
-        int idx = switchIndices.get(switchName);
-        
-        String val = null;
-        
-        if ( idx + 1 < args.length ) {
-            takenIndices.add(idx + 1);
-            val = args[idx + 1];
-        }
-        
-        return val == null ? defaultValue : val;
-    }
-    
-    /**
-     * Retrieves the value for the given switch as a {@code java.lang.Long}.
-     * 
-     * @param switchName    The switch for which value is wanted.
-     * @return              {@code java.lang.Long} value of the switch value.
-     * @throws NumberFormatException if the string does not 
-     *                      contain a parsable long.
-     */
-    public Long getSwitchLongValue(String switchName) {
-        return getSwitchLongValue(switchName, null);
-    }
-    
-    /**
-     * Retrieves the value for the given switch as a {@code java.lang.Long}, or
-     * the provided default value if the given switch is not found.
-     * 
-     * @param switchName    The switch for which value is wanted.
-     * @param defaultValue  A default value in the event the switch is not
-     *                      present.
-     * @return              {@code java.lang.Long} value, if the switch is 
-     *                      present; the supplied default value if the switch is
-     *                      not found.
-     * @throws NumberFormatException if the string does not 
-     *                      contain a parsable long.
-     */
-    public Long getSwitchLongValue(String switchName, Long defaultValue) {
-        String switchValue = getSwitchValue(switchName, null);
-        
-        if ( switchValue == null ) {
-            return defaultValue;
-        }
-        
-        return Long.parseLong(switchValue);
-    }
-    
-    /**
-     * Retrieves the value for the given switch as a {@code java.lang.Double}.
-     * 
-     * @param switchName    The switch for which value is wanted.
-     * @return              {@code java.lang.Double} value of the switch value.
-     * @throws NumberFormatException if the string does not 
-     *                      contain a parsable double.
-     */
-    public Double getSwitchDoubleValue(String switchName) {
-        return getSwitchDoubleValue(switchName, null);
-    }
-    
-    /**
-     * Retrieves the value for the given switch as a {@code java.lang.Double}, 
-     * or the provided default value if the given switch is not found.
-     * 
-     * @param switchName    The switch for which value is wanted.
-     * @param defaultValue  A default value in the event the switch is not
-     *                      present.
-     * @return              {@code java.lang.Double} value, if the switch is 
-     *                      present; the supplied default value if the switch is
-     *                      not found.
-     * @throws NumberFormatException if the string does not 
-     *                      contain a parsable double.
-     */
-    public Double getSwitchDoubleValue(String switchName, Double defaultValue) {
-        String switchValue = getSwitchValue(switchName, null);
-        
-        if ( switchValue == null ) {
-            return defaultValue;
-        }
-        
-        return Double.parseDouble(switchValue);
-    }
-    
-    /**
-     * Retrieves an array of {@code java.lang.String} values for the given 
-     * switch.
-     * 
-     * @param switchName    The switch for which values are wanted.
-     * @return              An array of {@code java.lang.String}s containing all
-     *                      of the values associated with the given switch. If
-     *                      the switch is not found, an array of length zero (0)
-     *                      will be returned.
-     */
-    public String[] getSwitchValues(String switchName) {
-        if ( !switchIndices.containsKey(switchName) ) {
-            return new String[0];
-        }
-        
-        int switchIndex = switchIndices.get(switchName);
-        int nextArgIndex = switchIndex + 1;
-        while ( nextArgIndex < args.length 
-                && !args[nextArgIndex].startsWith("-") ) {
-            takenIndices.add(nextArgIndex);
-            nextArgIndex++;
-        }
-        
-        String[] values = new String[nextArgIndex - switchIndex - 1];
-        for ( int idx = 0; idx < values.length; idx++ ) {
-            values[idx] = args[switchIndex + idx + 1];
-        }
-        
-        return values;
-    }
-    
-    /**
-     * Retrieves the switch and its values as a Plain Old Java Object (POJO).
-     * 
-     * @param clazz The class to which the switch and values should be placed
-     *              into.
-     * @return      {@code java.lang.Object} of the switch and its values.
-     * @throws RuntimeException in the event the POJO cannot be
-     *              created.
-     */
-    public <T> T getSwitchPOJO(Class<T> clazz) {
-        try {
-//            Class<?> newClass = Class.forName(clazz.getName());
-            Constructor<T> constructor = clazz.getConstructor();
-            T pojo = constructor.newInstance();
-            Field[] fields = clazz.getDeclaredFields();
-            
-            for ( Field field : fields ) {
-                Class fieldType = field.getType();
-                String fieldName = "-" + field.getName().replace("_", "-");
-                
-                // Check to see if the field name is valid.
-                String val = getSwitchValue(fieldName);
-                if ( val == null ) {
-                    fieldName = "-" + fieldName;
-                }
-                
-                if ( fieldType.equals(Boolean.class)
-                        || fieldType.equals(boolean.class) ) {
-                    field.set(pojo, isSwitchPresent(fieldName));
-                } else if ( fieldType.equals(String.class) ) {
-                    if ( getSwitchValue(fieldName) != null ) {
-                        field.set(pojo, getSwitchValue(fieldName));
-                    }
-                } else if ( fieldType.equals(Long.class) 
-                        || fieldType.equals(long.class) ) {
-                    if ( getSwitchLongValue(fieldName) != null ) {
-                        field.set(pojo, getSwitchLongValue(fieldName));
-                    }
-                } else if ( fieldType.equals(Integer.class) 
-                        || fieldType.equals(int.class) ) {
-                    if ( getSwitchLongValue(fieldName) != null ) {
-                        field.set(pojo, getSwitchLongValue(fieldName)
-                                .intValue());
-                    }
-                } else if ( fieldType.equals(Short.class) 
-                        || fieldType.equals(short.class) ) {
-                    if ( getSwitchLongValue(fieldName) != null ) {
-                        field.set(pojo, getSwitchLongValue(fieldName)
-                                .shortValue());
-                    }
-                } else if ( fieldType.equals(Byte.class) 
-                        || fieldType.equals(byte.class) ) {
-                    if ( getSwitchLongValue(fieldName) != null ) {
-                        field.set(pojo, getSwitchLongValue(fieldName)
-                                .byteValue());
-                    }
-                } else if ( fieldType.equals(Double.class) 
-                        || fieldType.equals(double.class) ) {
-                    if ( getSwitchDoubleValue(fieldName) != null ) {
-                        field.set(pojo, getSwitchDoubleValue(fieldName));
-                    }
-                } else if ( fieldType.equals(Float.class) 
-                        || fieldType.equals(float.class) ) {
-                    if ( getSwitchDoubleValue(fieldName) != null ) {
-                        field.set(pojo, getSwitchDoubleValue(fieldName)
-                                .floatValue());
-                    }
-                } else if ( fieldType.equals(String[].class) ) {
-                    String[] values = getSwitchValues(fieldName);
-                    if ( values.length != 0 ) {
-                        field.set(pojo, values);
-                    }
-                }
-            }
-            
-            return pojo;
-        } catch ( IllegalAccessException | NoSuchMethodException 
-                | InstantiationException | InvocationTargetException ex ) {
-            throw new RuntimeException("Error creating switch POJO", ex);
-        }
-    }
-    
-    /**
-     * Retrieves all targets as an array of {@code java.lang.String}s. The 
-     * targets that are returned are values that had no switch associated with
-     * them.
-     * 
-     * @return All of the targets that did not have a switch associated with
-     *         them.
-     */
-    public String[] getTargets() {
-        String[] aryTargets = new String[args.length - takenIndices.size()];
-        int targetIndex = 0;
-        
-        for ( int idx = 0; idx < args.length; idx++ ) {
-            if ( !takenIndices.contains(idx) ) {
-                aryTargets[targetIndex++] = args[idx];
-            }
-        }
-        
-        return aryTargets;
+    public Map<String, List<String>> getSwitches() {
+        return this.switches;
     }
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Private Instance Methods">
-    
+    /**
+     * Parse the arguments into a `java.util.HashMap` using the switch as the 
+     * key and all arguments up to the next hyphen (-) as the options to the
+     * switch. 
+     * 
+     * If the user needs to supply options that are required, but have no switch
+     * associated with them, those options will need to be passed first on the
+     * command line. This is information that needs to be included in the 
+     * program documentation.
+     * 
+     * @param args An array of `java.lang.String` values which include, both, 
+     *             switches and options, as well as options with no associated
+     *             switch.
+     * @return Map<String, List<String>> of the arguments in a more useful format.
+     *             Will return an empty map if no arguments provided.
+     */
+    private Map<String, List<String>> parse(String[] args) {
+        if ( args != null && args.length > 0 ) {
+            this.args = args;
+            
+            // Just in case our map has data in it, which it shouldn't.
+            switches.clear();
+            
+            /* We are going to perform a couple of loops. The first one is to
+             * get the switches and their options. The second one may or may not
+             * actually be run. If the developer used a dummy switch to mark the
+             * unswitched targets for his/her program, then there will be no
+             * elements left in the list we are going to create from our args
+             * variable, so the second loop will not run.
+             */
+            ArrayList<String> arguments = new ArrayList<>(Arrays.asList(args));
+            String key = null;
+            
+            /*
+                for each arg in arguments
+                    if key equals null
+                        if arg starts with "-"
+                            assign arg to key
+                        otherwise if arg does not start with "-"
+                            add arg to list
+                        otherwise
+                            set key to null
+                            continue loop
+                
+            */
+            
+        }
+        
+        return this.switches;
+    }
     //</editor-fold>
 
 }
