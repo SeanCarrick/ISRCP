@@ -18,6 +18,7 @@
 package com.is2300.rcp.printer;
 
 import java.io.File;
+import java.io.FileFilter;
 
 /**
  *
@@ -32,12 +33,12 @@ public class Printer {
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Private Member Fields">
-    
+    private static int printCount;
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Static Initializer">
     static {
-        
+        printCount = 0;
     }
     //</editor-fold>
 
@@ -59,30 +60,34 @@ public class Printer {
      * This method handles the necessary work for printing the files.
      * 
      * @param toPrint   The folder which contains the files to be printed.
-     * @param extension The extension of the files to be printed, so that only
+     * @param filter The extension of the files to be printed, so that only
      *                  the desired files are printed, and not everything in the
      *                  folder.
      * @return          {@code true} on success; {@code false} otherwise.
      * @throws NullPointerException if the pathname argument is null.
      */
-    public static boolean print(String pathToFiles, String extension) {
+    public static boolean print(String pathToFiles, FileFilter filter) {
         if ( pathToFiles == null ) {
             throw new NullPointerException("The path cannot be null.");
         }
         
+        boolean printed = false;
         File file = new File(pathToFiles);
         
         if ( file.isDirectory() ) {
-            for ( File f : file.listFiles() ) {
+            for ( File f : file.listFiles(filter) ) {
                 if ( f.isDirectory() ) {
-                    print(f.getAbsolutePath(), extension);
+                    print(f.getAbsolutePath(), filter);
                 } else {
-                    boolean printed = printFiles(f.getParentFile().listFiles());
+                    printed = printFile(f);
+                    printCount++;
                 }
             }
+        } else { 
+            printed = printFile(file);
         }
         
-        return true;
+        return printed;
     }
     //</editor-fold>
     
@@ -93,6 +98,16 @@ public class Printer {
         }
         
         return true;
+    }
+    
+    private static boolean printFile(File file) {
+        System.out.println(file.getAbsolutePath());
+        
+        return true;
+    }
+    
+    public static int getPrintCount() {
+        return printCount;
     }
     //</editor-fold>
     

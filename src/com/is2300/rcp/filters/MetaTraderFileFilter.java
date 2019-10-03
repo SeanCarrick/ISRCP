@@ -34,7 +34,7 @@ public class MetaTraderFileFilter implements FileFilter {
 
     //<editor-fold defaultstate="collapsed" desc="Intstance Initializer">
     {
-        extensions = new String[] {"mq4", "mq5", "mqt"};
+        extensions = new String[] {".mq4", ".mq5", ".mqt"};
     }
     //</editor-fold>
 
@@ -44,6 +44,8 @@ public class MetaTraderFileFilter implements FileFilter {
         for ( String extension : extensions ) {
             if ( file.getName().toLowerCase().endsWith(extension) ) {
                 return true;
+            } else {
+                return file.isDirectory();
             }
         }
         

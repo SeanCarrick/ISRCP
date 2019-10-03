@@ -34,7 +34,7 @@ public class ArduinoNanoSketchFileFilter implements FileFilter {
 
     //<editor-fold defaultstate="collapsed" desc="Intstance Initializer">
     {
-        extensions = new String[] {"ino"};
+        extensions = new String[] {".ino"};
     }
     //</editor-fold>
 
@@ -44,6 +44,8 @@ public class ArduinoNanoSketchFileFilter implements FileFilter {
         for ( String extension : extensions ) {
             if ( file.getName().toLowerCase().endsWith(extension) ) {
                 return true;
+            } else {
+                return file.isDirectory();
             }
         }
         

@@ -34,7 +34,7 @@ public class VBDotNetFileFilter implements FileFilter {
 
     //<editor-fold defaultstate="collapsed" desc="Intstance Initializer">
     {
-        extensions = new String[] {"vb"};
+        extensions = new String[] {".vb"};
     }
     //</editor-fold>
 
@@ -44,6 +44,8 @@ public class VBDotNetFileFilter implements FileFilter {
         for ( String extension : extensions ) {
             if ( file.getName().toLowerCase().endsWith(extension) ) {
                 return true;
+            } else {
+                return file.isDirectory();
             }
         }
         

@@ -34,7 +34,7 @@ public class XmlFileFilter implements FileFilter {
 
     //<editor-fold defaultstate="collapsed" desc="Intstance Initializer">
     {
-        extensions = new String[] {"xml", "rss", "svg"};
+        extensions = new String[] {".xml", ".rss", ".svg"};
     }
     //</editor-fold>
 
@@ -44,6 +44,8 @@ public class XmlFileFilter implements FileFilter {
         for ( String extension : extensions ) {
             if ( file.getName().toLowerCase().endsWith(extension) ) {
                 return true;
+            } else {
+                return file.isDirectory();
             }
         }
         

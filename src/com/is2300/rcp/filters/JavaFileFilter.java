@@ -34,7 +34,8 @@ public class JavaFileFilter implements FileFilter {
 
     //<editor-fold defaultstate="collapsed" desc="Intstance Initializer">
     {
-        extensions = new String[] {"java", "jsp", "jspx", "wss", "do", "action"};
+        extensions = new String[] {".java", ".jsp", ".jspx", ".wss", ".do", 
+            ".action"};
     }
     //</editor-fold>
 
@@ -44,6 +45,8 @@ public class JavaFileFilter implements FileFilter {
         for ( String extension : extensions ) {
             if ( file.getName().toLowerCase().endsWith(extension) ) {
                 return true;
+            } else {
+                return file.isDirectory();
             }
         }
         
