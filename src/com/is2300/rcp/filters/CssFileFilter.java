@@ -34,7 +34,8 @@ public class CssFileFilter implements FileFilter {
 
     //<editor-fold defaultstate="collapsed" desc="Intstance Initializer">
     {
-        extensions = new String[] {"css", "hss", "sass", "less", "ccss", "pcss"};
+        extensions = new String[] {".css", ".hss", ".sass", ".less", ".ccss", 
+            ".pcss"};
     }
     //</editor-fold>
 
@@ -44,6 +45,8 @@ public class CssFileFilter implements FileFilter {
         for ( String extension : extensions ) {
             if ( file.getName().toLowerCase().endsWith(extension) ) {
                 return true;
+            } else {
+                return file.isDirectory();
             }
         }
         

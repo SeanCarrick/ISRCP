@@ -34,7 +34,8 @@ public class AspNetFileFilter implements FileFilter {
 
     //<editor-fold defaultstate="collapsed" desc="Intstance Initializer">
     {
-        extensions = new String[] {"aspx", "axd", "asx", "asmx", "ashx", "svc"};
+        extensions = new String[] {".aspx", ".axd", ".asx", ".asmx", ".ashx", 
+            ".svc"};
     }
     //</editor-fold>
 
@@ -44,6 +45,8 @@ public class AspNetFileFilter implements FileFilter {
         for ( String extension : extensions ) {
             if ( file.getName().toLowerCase().endsWith(extension) ) {
                 return true;
+            } else {
+                return file.isDirectory();
             }
         }
         

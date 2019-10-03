@@ -34,7 +34,7 @@ public class HtmlFileFilter implements FileFilter {
 
     //<editor-fold defaultstate="collapsed" desc="Intstance Initializer">
     {
-        extensions = new String[] {"htm", "html", "xhtml", "jhtml"};
+        extensions = new String[] {".htm", ".html", ".xhtml", ".jhtml"};
     }
     //</editor-fold>
 
@@ -44,6 +44,8 @@ public class HtmlFileFilter implements FileFilter {
         for ( String extension : extensions ) {
             if ( file.getName().toLowerCase().endsWith(extension) ) {
                 return true;
+            } else {
+                return file.isDirectory();
             }
         }
         

@@ -34,7 +34,7 @@ public class RubyRailsFileFilter implements FileFilter {
 
     //<editor-fold defaultstate="collapsed" desc="Intstance Initializer">
     {
-        extensions = new String[] {"erb", "rjs"};
+        extensions = new String[] {".erb", ".rjs"};
     }
     //</editor-fold>
 
@@ -44,6 +44,8 @@ public class RubyRailsFileFilter implements FileFilter {
         for ( String extension : extensions ) {
             if ( file.getName().toLowerCase().endsWith(extension) ) {
                 return true;
+            } else {
+                return file.isDirectory();
             }
         }
         

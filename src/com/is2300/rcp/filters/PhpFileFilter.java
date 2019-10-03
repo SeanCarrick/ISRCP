@@ -34,7 +34,7 @@ public class PhpFileFilter implements FileFilter {
 
     //<editor-fold defaultstate="collapsed" desc="Intstance Initializer">
     {
-        extensions = new String[] {"php", "php3", "php4", "phtml"};
+        extensions = new String[] {".php", ".php3", ".php4", ".phtml"};
     }
     //</editor-fold>
 
@@ -44,6 +44,8 @@ public class PhpFileFilter implements FileFilter {
         for ( String extension : extensions ) {
             if ( file.getName().toLowerCase().endsWith(extension) ) {
                 return true;
+            } else {
+                return file.isDirectory();
             }
         }
         

@@ -34,8 +34,8 @@ public class JavaScriptFileFilter implements FileFilter {
 
     //<editor-fold defaultstate="collapsed" desc="Intstance Initializer">
     {
-        extensions = new String[] {"js", "jse", "htm", "html", "xhtml", "asp",
-                "hta", "aspx"};
+        extensions = new String[] {".js", ".jse", ".htm", ".html", ".xhtml", 
+            ".asp", ".hta", ".aspx"};
     }
     //</editor-fold>
 
@@ -45,6 +45,8 @@ public class JavaScriptFileFilter implements FileFilter {
         for ( String extension : extensions ) {
             if ( file.getName().toLowerCase().endsWith(extension) ) {
                 return true;
+            } else {
+                return file.isDirectory();
             }
         }
         

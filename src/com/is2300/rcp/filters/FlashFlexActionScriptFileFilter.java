@@ -34,7 +34,7 @@ public class FlashFlexActionScriptFileFilter implements FileFilter {
 
     //<editor-fold defaultstate="collapsed" desc="Intstance Initializer">
     {
-        extensions = new String[] {"as", "mxml"};
+        extensions = new String[] {".as", ".mxml"};
     }
     //</editor-fold>
 
@@ -44,6 +44,8 @@ public class FlashFlexActionScriptFileFilter implements FileFilter {
         for ( String extension : extensions ) {
             if ( file.getName().toLowerCase().endsWith(extension) ) {
                 return true;
+            } else {
+                return file.isDirectory();
             }
         }
         
