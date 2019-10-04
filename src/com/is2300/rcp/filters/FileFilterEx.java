@@ -27,30 +27,61 @@ import java.io.FileFilter;
  * @version 0.1.0
  * @since 0.1.0
  */
-public class ErlangFileFilter implements FileFilter {
+public class FileFilterEx implements FileFilter {
+    //<editor-fold defaultstate="collapsed" desc="Public Static Constants">
+    
+    //</editor-fold>
+
     //<editor-fold defaultstate="collapsed" desc="Private Member Fields">
-    private final String[] extensions;
+    private final String[] extensions;    
+    //</editor-fold>
+
+    //<editor-fold defaultstate="collapsed" desc="Static Initializer">
+    static {
+        
+    }
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Intstance Initializer">
     {
-        extensions = new String[] {".yaws"};
+        
     }
     //</editor-fold>
 
+    //<editor-fold defaultstate="collapsed" desc="Constructor(s)">
+    public FileFilterEx (String[] extensions) {
+        this.extensions = extensions;
+    }
+    //</editor-fold>
+
+    //<editor-fold defaultstate="collapsed" desc="Public Static Methods">
+    
+    //</editor-fold>
+
     //<editor-fold defaultstate="collapsed" desc="Public Instance Methods">
+    /**
+     * Tests whether or not the specified abstract path name should be included
+     * in a pathname list.
+     * 
+     * @param file The abstract pathname to be tested
+     * @return boolean `true` if and only if the pathname should be included
+     */
     @Override
     public boolean accept(File file) {
         for ( String extension : extensions ) {
-            if ( file.getName().toLowerCase().endsWith(extension) ) {
+            if ( file.getName().toLowerCase().endsWith(extension) 
+                    || file.isDirectory() ) {
                 return true;
-            } else {
-                return file.isDirectory();
             }
         }
         
         return false;
     }
+    
+    //</editor-fold>
+
+    //<editor-fold defaultstate="collapsed" desc="Private Instance Methods">
+    
     //</editor-fold>
 
 }

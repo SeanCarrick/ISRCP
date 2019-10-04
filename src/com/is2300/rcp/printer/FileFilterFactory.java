@@ -17,44 +17,8 @@
 
 package com.is2300.rcp.printer;
 
-import com.is2300.rcp.filters.AdaBodyFileFilter;
-import com.is2300.rcp.filters.AdaSpecFileFilter;
-import com.is2300.rcp.filters.ArduinoNanoSketchFileFilter;
-import com.is2300.rcp.filters.AspClassicFileFilter;
-import com.is2300.rcp.filters.AspNetFileFilter;
-import com.is2300.rcp.filters.BashFileFilter;
-import com.is2300.rcp.filters.BasicFileFilter;
-import com.is2300.rcp.filters.BatchFileFilter;
-import com.is2300.rcp.filters.CFileFilter;
-import com.is2300.rcp.filters.CSharpFileFilter;
-import com.is2300.rcp.filters.CgiFileFilter;
-import com.is2300.rcp.filters.ColdFusionFileFilter;
-import com.is2300.rcp.filters.CppFileFilter;
-import com.is2300.rcp.filters.DigitalMarsDFileFilter;
-import com.is2300.rcp.filters.ErlangFileFilter;
-import com.is2300.rcp.filters.FlashFileFilter;
-import com.is2300.rcp.filters.FlashFlexActionScriptFileFilter;
-import com.is2300.rcp.filters.HtmlFileFilter;
-import com.is2300.rcp.filters.JSharpFileFilter;
-import com.is2300.rcp.filters.JavaFileFilter;
-import com.is2300.rcp.filters.JavaScriptFileFilter;
-import com.is2300.rcp.filters.LuaFileFilter;
-import com.is2300.rcp.filters.MathematicaFileFilter;
-import com.is2300.rcp.filters.MetaTraderFileFilter;
-import com.is2300.rcp.filters.ObjCFileFilter;
-import com.is2300.rcp.filters.PerlFileFilter;
-import com.is2300.rcp.filters.PhpFileFilter;
-import com.is2300.rcp.filters.PythonFileFilter;
-import com.is2300.rcp.filters.PythonNotebookFileFilter;
-import com.is2300.rcp.filters.RFileFilter;
-import com.is2300.rcp.filters.RubyFileFilter;
-import com.is2300.rcp.filters.RubyRailsFileFilter;
-import com.is2300.rcp.filters.SslFileFilter;
-import com.is2300.rcp.filters.TclFileFilter;
-import com.is2300.rcp.filters.UnrealScriptFileFilter;
-import com.is2300.rcp.filters.VBDotNetFileFilter;
-import com.is2300.rcp.filters.VisualBasicScriptFileFilter;
-import com.is2300.rcp.filters.XmlFileFilter;
+import com.is2300.rcp.StartPrinting;
+import com.is2300.rcp.filters.FileFilterEx;
 import java.io.FileFilter;
 
 /**
@@ -92,127 +56,10 @@ public final class FileFilterFactory {
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Public Static Methods">
-    public static FileFilter createFileFilter(String lang) {
-        FileFilter filter = null;
-        
-        switch ( lang ) {
-            case "adab":
-                filter = new AdaBodyFileFilter();
-                break;
-            case "adas":
-                filter = new AdaSpecFileFilter();
-                break;
-            case "ardns":
-                filter = new ArduinoNanoSketchFileFilter();
-                break;
-            case "asp":
-                filter = new AspClassicFileFilter();
-                break;
-            case "aspnet":
-                filter = new AspNetFileFilter();
-                break;
-            case "bash":
-                filter = new BashFileFilter();
-                break;
-            case "basic":
-                filter = new BasicFileFilter();
-                break;
-            case "bat":
-                filter = new BatchFileFilter();
-                break;
-            case "c":
-                filter = new CFileFilter();
-                break;
-            case "cpp":
-                filter = new CppFileFilter();
-                break;
-            case "csharp":
-                filter = new CSharpFileFilter();
-                break;
-            case "objc":
-                filter = new ObjCFileFilter();
-                break;
-            case "cgi":
-                filter = new CgiFileFilter();
-                break;
-            case "cold":
-                filter = new ColdFusionFileFilter();
-                break;
-            case "dm":
-                filter = new DigitalMarsDFileFilter();
-                break;
-            case "erl":
-                filter = new ErlangFileFilter();
-                break;
-            case "flash":
-                filter = new FlashFileFilter();
-                break;
-            case "flex":
-                filter = new FlashFlexActionScriptFileFilter();
-                break;
-            case "html":
-                filter = new HtmlFileFilter();
-                break;
-            case "jsharp":
-                filter = new JSharpFileFilter();
-                break;
-            case "java":
-                filter = new JavaFileFilter();
-                break;
-            case "js":
-                filter = new JavaScriptFileFilter();
-                break;
-            case "lua":
-                filter = new LuaFileFilter();
-                break;
-            case "math":
-                filter = new MathematicaFileFilter();
-                break;
-            case "meta":
-                filter = new MetaTraderFileFilter();
-                break;
-            case "perl":
-                filter = new PerlFileFilter();
-                break;
-            case "php":
-                filter = new PhpFileFilter();
-                break;
-            case "python":
-                filter = new PythonFileFilter();
-                break;
-            case "jupiter":
-                filter = new PythonNotebookFileFilter();
-                break;
-            case "r":
-                filter = new RFileFilter();
-                break;
-            case "ruby":
-                filter = new RubyFileFilter();
-                break;
-            case "rails":
-                filter = new RubyRailsFileFilter();
-                break;
-            case "ssl":
-                filter = new SslFileFilter();
-                break;
-            case "tcl":
-                filter = new TclFileFilter();
-                break;
-            case "us":
-                filter = new UnrealScriptFileFilter();
-                break;
-            case "vbnet":
-                filter = new VBDotNetFileFilter();
-                break;
-            case "vb":
-                filter = new VisualBasicScriptFileFilter();
-                break;
-            case "xml":
-                filter = new XmlFileFilter();
-                break;
-        }
-        
-        return filter;
+    public static FileFilter createFileFilter(String language) {
+        return new FileFilterEx(
+                StartPrinting.LANG_CODES.get(
+                        StartPrinting.LANGS.get(language)));
     }
     //</editor-fold>
 
