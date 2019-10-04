@@ -118,9 +118,24 @@ public class CmdLineParser {
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Public Instance Methods">
-    
+    /**
+     * Retrieve all of the switches, options and targets provided from the user
+     * on the command line.
+     * 
+     * @return Map<String, List<String>> of key-value pairs
+     */
     public Map<String, List<String>> getSwitches() {
         return this.switches;
+    }
+    
+    /**
+     * Retrieves the `List<String>` of the value for the given key.
+     * 
+     * @param key   The key for the value to retrieve.
+     * @return List<String> which is the value for the given key.
+     */
+    public List<String> getValueList(String key) {
+        return switches.get(key);
     }
     //</editor-fold>
 
@@ -158,20 +173,7 @@ public class CmdLineParser {
             List<String> arguments = new ArrayList<>(Arrays.asList(args));
             List<String> argList = new ArrayList<>();
             String key = null;
-            boolean keyFound = false;
             
-            /*
-                for each arg in arguments
-                    if key equals null
-                        if arg starts with "-"
-                            assign arg to key
-                        otherwise if arg does not start with "-"
-                            add arg to list
-                        otherwise
-                            set key to null
-                            continue loop
-                
-            */
             int counter = 1;
             for ( String arg : arguments ) {
                 if ( arg.startsWith("-") && key == null ) {
