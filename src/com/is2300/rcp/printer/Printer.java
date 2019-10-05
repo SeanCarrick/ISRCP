@@ -110,9 +110,13 @@ public class Printer {
             ex.printStackTrace(System.err);
             return success;
         } catch (PrintException ex) {
-            System.err.println(ex.getMessage());
-            ex.printStackTrace(System.err);
-            return success;
+            if ( ex.getMessage().contains("already printing") ) {
+                success = true;
+            } else {
+                System.err.println(ex.getMessage());
+                ex.printStackTrace(System.err);
+                return success;
+            }
         }
         
         return success;
