@@ -17,11 +17,11 @@
 package com.is2300.rcp;
 
 import com.is2300.cmdlineparser.CmdLineParser;
+import com.is2300.rcp.desktop.RcpFrame;
 import com.is2300.rcp.enums.SysExits;
+import com.is2300.rcp.printer.FileFilterFactory;
+import com.is2300.rcp.printer.PrintSetup;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -104,8 +104,6 @@ public class StartPrinting {
     public static final int BUILD;
     public static final String WARRANTY;
     public static final Properties PROPS;
-    public static final Map<String, String[]> LANG_CODES;
-    public static final Map<String, String> LANGS;
     
     static {
         BUILD  = -1 * ((int)System.currentTimeMillis() / 5000000);
@@ -139,11 +137,7 @@ public class StartPrinting {
         sb.append("along with this program.  If not, see <http://www.gnu.org/licenses/>.");
         
         WARRANTY = sb.toString();
-        
-        LANG_CODES = new HashMap<>();
-        LANGS = new HashMap<>();
-        loadLanguagesMap();
-        
+                
         PROPS = new Properties();
         
         /*File propsFile = new File(System.getProperty("user.home") 
@@ -168,25 +162,31 @@ public class StartPrinting {
         
         Map<String, List<String>> testMap = parser.getSwitches();
         
-        for ( Map.Entry<String, List<String>> key : testMap.entrySet() ) {
-            System.out.println("Key = " + key.getKey() + "\nValue = " 
-                    + key.getValue());
-        }
-        
-/*        if ( parser.isSwitchPresent("-c") 
+        if ( parser.isSwitchPresent("-c") 
                 || parser.isSwitchPresent("--conditions") ) {
             
             showConditions();
             
         } else if ( (parser.isSwitchPresent("-d") 
                 || parser.isSwitchPresent("--dir")) 
-                && (parser.isSwitchPresent("-f") 
+                && (parser.isSwitchPresent("-l") 
                 || parser.isSwitchPresent("--filter")) ) {
             long start = System.currentTimeMillis();
             
-            FileFilter filter = FileFilterFactory.createFileFilter(
-                    parser.getSwitchValue(parser.getArgument(2)));
-            PrintSetup.print(parser.getSwitchValue(parser.getArgument(0)), filter);
+            String[] langCodes = new String[]{"-l", "--lang"};
+            String[] dirKeys = new String[]{"-d", "--dir"};
+            
+            String langCode = parser.getKeyForValue(langCodes);
+            List<String> langs = parser.getValueList(langCode);
+            String lang = langs.get(0);
+            if ( lang.isBlank() ) {
+                throw new IllegalArgumentException("No switch provided for the "
+                        + "language to print.");
+            }
+            String dirKey = parser.getKeyForValue(dirKeys);
+            List<String> dirs = parser.getValueList(dirKey);
+            String dir = dirs.get(0);
+            PrintSetup.print(dir, FileFilterFactory.createFileFilter(lang));
             
             long finish = System.currentTimeMillis();
             long totalTime = (finish - start) / 1000;
@@ -216,92 +216,8 @@ public class StartPrinting {
         } else {
             showHelp(SysExits.EX_USAGE);
         }
-*/    }
-    
-    static void loadLanguagesMap() {
-
-        LANGS.put("Ada Body", "adab");
-        LANGS.put("Ada Spec", "adas");
-        LANGS.put("Arduino / Nano Sketch", "arduino");
-        LANGS.put("ASP", "asp");
-        LANGS.put("ASP.Net", "aspnet");
-        LANGS.put("Bash Scripting", "bash");
-        LANGS.put("BASIC", "basic");
-        LANGS.put("Batch Files", "batch");
-        LANGS.put("C", "c");
-        LANGS.put("Objective C", "objc");
-        LANGS.put("C++", "cpp");
-        LANGS.put("C#", "cs");
-        LANGS.put("CGI", "cgi");
-        LANGS.put("Cold Fusion", "cold");
-        LANGS.put("Digital Mars", "dm");
-        LANGS.put("Erlang", "erl");
-        LANGS.put("Flash", "flash");
-        LANGS.put("Flash/Flex Action", "flex");
-        LANGS.put("HTML", "html");
-        LANGS.put("J#", "jsharp");
-        LANGS.put("Java", "java");
-        LANGS.put("JavaScript", "js");
-        LANGS.put("Lua", "lua");
-        LANGS.put("Mathematica", "math");
-        LANGS.put("MetaTrader", "meta");
-        LANGS.put("Perl", "perl");
-        LANGS.put("PHP", "php");
-        LANGS.put("Python", "python");
-        LANGS.put("Python Notebook", "jupyter");
-        LANGS.put("R", "r");
-        LANGS.put("Ruby", "ruby");
-        LANGS.put("Ruby on Rails", "rails");
-        LANGS.put("SSL", "ssl");
-        LANGS.put("TCL", "tcl");
-        LANGS.put("Unreal Script", "us");
-        LANGS.put("VB.net", "vbnet");
-        LANGS.put("Visual Basic", "vbs");
-        LANGS.put("XML", "xml");
-
-        LANG_CODES.put("adab", new String[]{".adb"});
-        LANG_CODES.put("adas", new String[]{".ads"});
-        LANG_CODES.put("arduino", new String[]{".ino"});
-        LANG_CODES.put("asp", new String[]{".asp"});
-        LANG_CODES.put("aspnet", new String[]{".aspx", ".axd", ".asx", ".asmx", 
-                    ".ashx", ".svc"});
-        LANG_CODES.put("bash", new String[]{".sh"});
-        LANG_CODES.put("basic", new String[]{".bas", ".mod"});
-        LANG_CODES.put("batch", new String[]{".bat"});
-        LANG_CODES.put("c", new String[]{".h", ".c", ".cc"});
-        LANG_CODES.put("objc", new String[]{".m", ".mm"});
-        LANG_CODES.put("cpp", new String[]{".h", ".cpp", ".cxx"});
-        LANG_CODES.put("cs", new String[]{".cs"});
-        LANG_CODES.put("cgi", new String[]{".cgi"});
-        LANG_CODES.put("cold", new String[]{".cfm"});
-        LANG_CODES.put("dm", new String[]{".d"});
-        LANG_CODES.put("erl", new String[]{".yaws"});
-        LANG_CODES.put("flash", new String[]{".swf"});
-        LANG_CODES.put("flex", new String[]{".as", ".mxml"});
-        LANG_CODES.put("html", new String[]{".htm", ".html", ".xhtml", 
-            ".jhtml"});
-        LANG_CODES.put("jsharp", new String[]{".jsl"});
-        LANG_CODES.put("java", new String[]{".java", ".jsp", ".jspx", ".wss", 
-                    ".do", ".action"});
-        LANG_CODES.put("js", new String[]{".js", ".jse", ".htm", ".html", 
-                    ".xhtml", ".asp", ".hta", ".aspx"});
-        LANG_CODES.put("lua", new String[]{".lua"});
-        LANG_CODES.put("math", new String[]{".m"});
-        LANG_CODES.put("meta", new String[]{".mq4", ".mq5", ".mqt"});
-        LANG_CODES.put("perl", new String[]{".pl", ".pm"});
-        LANG_CODES.put("php", new String[]{".php", ".php3", ".php4", ".phtml"});
-        LANG_CODES.put("python", new String[]{".py"});
-        LANG_CODES.put("jupyter", new String[]{".ipynb"});
-        LANG_CODES.put("r", new String[]{".r"});
-        LANG_CODES.put("ruby", new String[]{".rb", ".rhtml"});
-        LANG_CODES.put("rails", new String[]{".erb", ".rjs"});
-        LANG_CODES.put("ssl", new String[]{".shtml"});
-        LANG_CODES.put("tcl", new String[]{".tcl"});
-        LANG_CODES.put("us", new String[]{".uc"});
-        LANG_CODES.put("vbnet", new String[]{".vb"});
-        LANG_CODES.put("vbs", new String[]{".vbs"});
-        LANG_CODES.put("xml", new String[]{".xml", ".rss", ".svg"});
     }
+    
     
     static void showHelp(SysExits exitStatus) {
         System.out.println("Recursive Code Printer (ISRCP)");
@@ -322,7 +238,7 @@ public class StartPrinting {
         System.out.println();
 //        System.out.println("\t-c | --conditions\tShow conditions details");
         System.out.println("   -d path | --dir path\t\tThe folder to process");
-        System.out.println("   -f lang | --filter lang\tThe language code for the"
+        System.out.println("   -l lang | --lang lang\tThe language code for the"
                 + " files to process");
         System.out.println("\t-h | --help\t\tShow this help and exit");
         System.out.println("\t-v | --version\t\tShow program version and exit");

@@ -17,12 +17,21 @@
 
 package com.is2300.rcp.printer;
 
-import java.awt.Graphics;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.print.PageFormat;
-import java.awt.print.Printable;
-import java.awt.print.PrinterException;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import javax.print.Doc;
+import javax.print.DocFlavor;
+import javax.print.DocPrintJob;
+import javax.print.PrintException;
+import javax.print.PrintService;
+import javax.print.PrintServiceLookup;
+import javax.print.SimpleDoc;
+import javax.print.attribute.HashPrintRequestAttributeSet;
+import javax.print.attribute.PrintRequestAttributeSet;
 
 /**
  *
@@ -31,13 +40,19 @@ import java.awt.print.PrinterException;
  * @version 0.1.0
  * @since 0.1.0
  */
-public class Printer implements Printable, ActionListener {
+public class Printer {
     //<editor-fold defaultstate="collapsed" desc="Public Static Constants">
     
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Private Member Fields">
-    
+    final String defaultPrinter;
+    final PrintService service;
+    final PrintRequestAttributeSet attributes;
+    final DocPrintJob job;
+    FileInputStream in;
+    Doc doc;
+    DocFlavor flavor;
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Static Initializer">
@@ -48,13 +63,17 @@ public class Printer implements Printable, ActionListener {
 
     //<editor-fold defaultstate="collapsed" desc="Intstance Initializer">
     {
-        
+        service = PrintServiceLookup.lookupDefaultPrintService();
+        defaultPrinter = service.getName();
+        attributes = new HashPrintRequestAttributeSet();
+        flavor = DocFlavor.INPUT_STREAM.AUTOSENSE;
+        job = service.createPrintJob();
     }
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Constructor(s)">
     public Printer () {
-        
+        System.out.println("\nPrinting to: " + defaultPrinter + "\n\n");
     }
     //</editor-fold>
 
@@ -63,41 +82,40 @@ public class Printer implements Printable, ActionListener {
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Public Instance Methods">
-    /**
-     * Prints the page at the specified index into the specified `Graphics`
-     * context in the specified format. A `PrinterJob` calls the 
-     * `Printable` interface to request that a page be rendered into the context
-     * specified by `graphics`. The format of the page to be drawn is
-     * specified by `pageFormat`. The zero based index of the requested
-     * page is specified by `pageIndex`. If the requested page does not
-     * exist then this method returns `NO_SUCH_PAGE`; otherwise `PAGE_EXISTS` is 
-     * returned. The `Graphics` class or subclass implements the 
-     * `PrinterGraphics` interface to provide additional information. If the 
-     * `Printable` object aborts the print job then it throws a 
-     * `PrinterException`.
-     * 
-     * @param graphics the context into which the page is drawn
-     * @param pageFormat the size and orientation of the page being drawn
-     * @param pageIndex the zero based index of the page to be drawn
-     * @return PAGE_EXISTS if the page is rendered successfully or `NO_SUCH_PAGE`
-     * if `pageIndex` specifies a non-existent page.
-     * @throws PrinterException - thrown when the print job is terminated.
-     */
-    @Override
-    public int print(Graphics graphics, PageFormat pageFormat, int pageIndex) throws PrinterException {
-        //TODO: handle print
+    public boolean print(File fileToPrint) {
+        if ( fileToPrint == null ) {
+            throw new IllegalArgumentException("No file to print was provided.");
+        }
+        boolean success = false;
         
-        return 0;
-    }
-    
-    /**
-     * Invoked when an action occurs.
-     * 
-     * @param e the event to be processed
-     */
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        // TODO: handle action.
+        try ( FileInputStream in = new FileInputStream(fileToPrint) ) {
+            doc = new SimpleDoc(in, flavor, null);
+            PrintJobWatcher watcher = new PrintJobWatcher(job);
+            job.print(doc, attributes);
+            watcher.waitForDone();
+            in.close();
+            
+            InputStream ff = new ByteArrayInputStream("\f".getBytes());
+            Doc docFF = new SimpleDoc(ff, flavor, null);
+            job.print(docFF, null);
+            watcher.waitForDone();
+            
+            success = true;
+        } catch ( FileNotFoundException ex ) {
+            System.err.println(ex.getMessage());
+            ex.printStackTrace(System.err);
+            return success;
+        } catch(IOException ex ) {
+            System.err.println(ex.getMessage());
+            ex.printStackTrace(System.err);
+            return success;
+        } catch (PrintException ex) {
+            System.err.println(ex.getMessage());
+            ex.printStackTrace(System.err);
+            return success;
+        }
+        
+        return success;
     }
     //</editor-fold>
 
