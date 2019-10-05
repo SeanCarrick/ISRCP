@@ -22,8 +22,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeSet;
-import org.apache.commons.lang3.ArrayUtils;
+import java.util.Set;
 
 /**
  * `CmdLineParser` is a library class for parsing command line arguments in a
@@ -118,6 +117,10 @@ public class CmdLineParser {
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Public Instance Methods">
+    
+    public boolean isSwitchPresent(String switchName) {
+        return switches.containsKey(switchName);
+    }
     /**
      * Retrieve all of the switches, options and targets provided from the user
      * on the command line.
@@ -136,6 +139,31 @@ public class CmdLineParser {
      */
     public List<String> getValueList(String key) {
         return switches.get(key);
+    }
+    
+    /**
+     * Retrieves the appropriate key when their are multiple choices for a key
+     * identifier that can be passed on the command line. For example, if your
+     * program accepts the switches `-f` or `--filename` for providing a file
+     * to your program, then you would pass into this method a `String` array of
+     * both of those options and the one that was used will be returned.
+     * 
+     * @param possibleKeys The possible switches that could have been passed.
+     * @return String of the switch that was used; empty string if the key was
+     *          not found.
+     */
+    public String getKeyForValue(String[] possibleKeys) {
+        Set<String> keys = switches.keySet();
+        
+        for ( String key : possibleKeys ) {
+            for ( String k : keys ) {
+                if ( key.equals(k) ) {
+                    return key;
+                }
+            }
+        }
+        
+        return "";
     }
     //</editor-fold>
 
@@ -162,14 +190,6 @@ public class CmdLineParser {
             
             // Just in case our map has data in it, which it shouldn't.
             switches.clear();
-            
-            /* We are going to perform a couple of loops. The first one is to
-             * get the switches and their options. The second one may or may not
-             * actually be run. If the developer used a dummy switch to mark the
-             * unswitched targets for his/her program, then there will be no
-             * elements left in the list we are going to create from our args
-             * variable, so the second loop will not run.
-             */
             List<String> arguments = new ArrayList<>(Arrays.asList(args));
             List<String> argList = new ArrayList<>();
             String key = null;

@@ -108,8 +108,11 @@ public class PrintSetup {
                 if ( f.isDirectory() ) {
                     print(f.getAbsolutePath(), filter);
                 } else {
-                    printed = printFile(f);
-                    printCount++;
+                    Printer printer = new Printer();
+                    printed = printer.print(f); //printFile(f);
+                    if ( printed ) {
+                        printCount++;
+                    }
                 }
             }
         } else { 
