@@ -55,12 +55,6 @@ public class Printer {
     DocFlavor flavor;
     //</editor-fold>
 
-    //<editor-fold defaultstate="collapsed" desc="Static Initializer">
-    static {
-        
-    }
-    //</editor-fold>
-
     //<editor-fold defaultstate="collapsed" desc="Intstance Initializer">
     {
         service = PrintServiceLookup.lookupDefaultPrintService();
@@ -75,10 +69,6 @@ public class Printer {
     public Printer () {
         System.out.println("\nPrinting to: " + defaultPrinter + "\n\n");
     }
-    //</editor-fold>
-
-    //<editor-fold defaultstate="collapsed" desc="Public Static Methods">
-    
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Public Instance Methods">
@@ -121,10 +111,6 @@ public class Printer {
         
         return success;
     }
-    //</editor-fold>
-
-    //<editor-fold defaultstate="collapsed" desc="Private Instance Methods">
-    
     //</editor-fold>
 
 }
