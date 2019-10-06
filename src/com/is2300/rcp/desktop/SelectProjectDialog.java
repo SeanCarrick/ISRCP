@@ -24,12 +24,16 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import javax.swing.AbstractListModel;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import javax.swing.GroupLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JList;
-import javax.swing.JScrollPane;
 import javax.swing.LayoutStyle;
 import javax.swing.WindowConstants;
 
@@ -39,7 +43,11 @@ import javax.swing.WindowConstants;
  */
 public class SelectProjectDialog extends javax.swing.JDialog {
     public String projectName;
+    public String lastPrinted;
+    public String language;
     public boolean selected;
+    
+    private Map<String, String> projectPaths;
     
     /**
      * Creates new form SelectProjectDialog
@@ -47,6 +55,8 @@ public class SelectProjectDialog extends javax.swing.JDialog {
     public SelectProjectDialog(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
+        
+        projectPaths = new HashMap<>();
         
         this.projectName = "[Type or Select Project Name]";
         
@@ -62,9 +72,36 @@ public class SelectProjectDialog extends javax.swing.JDialog {
     
     private void loadProjects() {
         lstProjects.add("[Type or Select Project Name]");
-        for ( String project : StartPrinting.PROPS.stringPropertyNames() ) {
-            lstProjects.add(project);
+        File projectsDir = new File(System.getProperty("user.home") + 
+                System.getProperty("file.separator") + ".isrcp" + 
+                System.getProperty("file.separator") + "projects");
+        
+        if ( projectsDir.listFiles().length > 0) {
+            for ( File project : projectsDir.listFiles() ) {
+                lstProjects.add(project.getName());
+                
+                try (BufferedReader in = new BufferedReader(
+                        new FileReader(project))) {
+                    String lastDate = in.readLine();
+                    String projectPath = in.readLine();
+                    this.language = in.readLine();
+                    
+                    in.close();
+                    
+                    StartPrinting.PROPS.setProperty(project.getName(), 
+                            lastDate);
+                    
+                    projectPaths.put(project.getName(), projectPath);
+                } catch ( IOException ex ) {
+                    System.err.println(ex.getMessage());
+                    ex.printStackTrace(System.err);
+                }
+            }
         }
+    }
+    
+    public String getProjectPath(String projectName) {
+        return projectPaths.get(projectName);
     }
 
     /**
