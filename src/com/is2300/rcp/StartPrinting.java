@@ -147,16 +147,12 @@ public class StartPrinting {
                 
         PROPS = new Properties();
         
-        File propsFile = new File(System.getProperty("user.home") 
-                + System.getProperty("file.separator") + ".isrcp.conf");
-        try (InputStream is = new FileInputStream(propsFile)) {
-            PROPS.load(is);
-        } catch (FileNotFoundException ex) {
-            // First time that the utility has been run, so we will just leave
-            //+ alone. The properties file will be saved when we exit.
-        } catch (IOException ex) {
-            System.err.println(ex.getMessage());
-            ex.printStackTrace(System.err);
+        File appPath = new File(System.getProperty("user.home") + 
+                System.getProperty("file.separator") + ".isrcp" + 
+                System.getProperty("file.separator") + "projects");
+        
+        if ( !appPath.exists() ) {
+            appPath.mkdirs();
         }
         
     }
@@ -231,6 +227,7 @@ public class StartPrinting {
 //         * We are just going to start the GUI for now. We'll figure out the
 //         * command-line stuff later.
 //         */
+        System.out.println(LocalDate.now().toString());
         RcpFrame.main(args);
     }
     

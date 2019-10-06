@@ -139,9 +139,9 @@ public class RcpFrame extends javax.swing.JFrame {
             }
         });
 
-        btnCancel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/is2300/rcp/desktop/Cancel.png"))); // NOI18N
+        btnCancel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/is2300/rcp/desktop/close.png"))); // NOI18N
         btnCancel.setMnemonic('C');
-        btnCancel.setText("Cancel");
+        btnCancel.setText("Close");
         btnCancel.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 CancelAction(evt);
@@ -393,12 +393,15 @@ public class RcpFrame extends javax.swing.JFrame {
         
         for ( File f : file.listFiles(filter) ) {
             if ( f.isDirectory() ) {
-                print(f.getAbsolutePath(), filter);
+                this.txtCurrentFolder.setText(f.getAbsolutePath());
+                /*print(f.getAbsolutePath(), filter);*/
+                System.out.println("Current Folder: " + f.getAbsolutePath());
                 this.pbFolder.setValue(this.pbFolder.getValue() + 1);
             } else {
                 FormattedPrinter printer = new FormattedPrinter(f.getAbsolutePath());
 
-                printer.actionPerformed(null);
+                /*printer.actionPerformed(null);*/
+                System.out.println("Current File: " + f.getName());
             }
         }
 
@@ -455,6 +458,20 @@ public class RcpFrame extends javax.swing.JFrame {
         
         if ( project.selected == true ) {        
             this.txtProjectName.setText(project.projectName);
+            this.txtSrcFolder.setText(project.getProjectPath(
+                    project.projectName));
+            this.lblLastPrint.setText("Last Printed On: " 
+                    + StartPrinting.PROPS.getProperty(project.projectName));
+            
+            int count = cboLanguage.getItemCount();
+            for ( int x = 0; x < count; x++ ) {
+                String item = cboLanguage.getItemAt(x);
+                
+                if ( item.contains(project.language) ) {
+                    cboLanguage.setSelectedIndex(x);
+                    break;
+                }
+            }
         }
     }//GEN-LAST:event_ProjectClick
 
