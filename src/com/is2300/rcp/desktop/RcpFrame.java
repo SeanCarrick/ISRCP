@@ -18,13 +18,32 @@ package com.is2300.rcp.desktop;
 
 import com.is2300.rcp.StartPrinting;
 import com.is2300.rcp.enums.SysExits;
+import com.is2300.rcp.filters.FileFilterEx;
+import com.is2300.rcp.printer.FileFilterFactory;
+import com.is2300.rcp.printer.FormattedPrinter;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.time.LocalDate;
+import static java.util.Locale.filter;
+import javax.print.Doc;
+import javax.print.DocFlavor;
+import javax.print.DocPrintJob;
+import javax.print.PrintException;
 import javax.print.PrintService;
 import javax.print.PrintServiceLookup;
+import javax.print.SimpleDoc;
+import javax.print.attribute.HashPrintRequestAttributeSet;
+import javax.print.attribute.PrintRequestAttributeSet;
+import javax.print.attribute.standard.Copies;
+import javax.print.attribute.standard.MediaSize;
+import javax.print.attribute.standard.Sides;
 import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+import javax.swing.UIManager;
 
 /**
  *
@@ -35,6 +54,10 @@ public class RcpFrame extends javax.swing.JFrame {
     private File curDir = new File(System.getProperty("user.home"));
     private File projDir = new File(System.getProperty("user.home") 
             + System.getProperty("file.separator") + ".isrcp/projects");
+    private int folders = 0;
+    private int files = 0;
+    private long startTime = 0;
+    private long endTime = 0;
     
     /**
      * Creates new form RcpFrame
@@ -55,7 +78,8 @@ public class RcpFrame extends javax.swing.JFrame {
             projDir.mkdirs();
         }
         
-        readProjects();
+        this.txtSrcFolder.setText(System.getProperty("user.home"));
+//        this.txtProjectName.setText("[Type or Select Project Name]");
     }
 
     /**
@@ -80,6 +104,14 @@ public class RcpFrame extends javax.swing.JFrame {
         lblLastPrint = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
         txtProjectName = new javax.swing.JTextField();
+        btnBrowseProjects = new javax.swing.JButton();
+        pnlProgress = new javax.swing.JPanel();
+        jLabel6 = new javax.swing.JLabel();
+        jLabel7 = new javax.swing.JLabel();
+        pbJob = new javax.swing.JProgressBar();
+        pbFolder = new javax.swing.JProgressBar();
+        jLabel5 = new javax.swing.JLabel();
+        txtCurrentFolder = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setTitle("IS Recursive Code Printer Utility");
@@ -119,6 +151,11 @@ public class RcpFrame extends javax.swing.JFrame {
         btnPrint.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/is2300/rcp/desktop/Print.png"))); // NOI18N
         btnPrint.setMnemonic('P');
         btnPrint.setText("Print Project");
+        btnPrint.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                DoPrintJob(evt);
+            }
+        });
 
         jLabel3.setDisplayedMnemonic('U');
         jLabel3.setLabelFor(cboSystemPrinters);
@@ -142,6 +179,76 @@ public class RcpFrame extends javax.swing.JFrame {
         lblLastPrint.setText("Last Print Run: [NEVER]");
 
         jLabel4.setText("Project Name:");
+
+        txtProjectName.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                ProjectGotFocus(evt);
+            }
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                ProjectLostFocus(evt);
+            }
+        });
+
+        btnBrowseProjects.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/is2300/rcp/desktop/Project.png"))); // NOI18N
+        btnBrowseProjects.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                ProjectClick(evt);
+            }
+        });
+
+        pnlProgress.setBorder(javax.swing.BorderFactory.createTitledBorder("Printing Progress"));
+        pnlProgress.setEnabled(false);
+
+        jLabel6.setText("Total Job:");
+        jLabel6.setEnabled(false);
+
+        jLabel7.setText("Current Folder:");
+        jLabel7.setEnabled(false);
+
+        pbJob.setEnabled(false);
+
+        pbFolder.setEnabled(false);
+
+        jLabel5.setText("Current Folder:");
+        jLabel5.setEnabled(false);
+
+        txtCurrentFolder.setEditable(false);
+        txtCurrentFolder.setText("[NONE]");
+        txtCurrentFolder.setEnabled(false);
+
+        javax.swing.GroupLayout pnlProgressLayout = new javax.swing.GroupLayout(pnlProgress);
+        pnlProgress.setLayout(pnlProgressLayout);
+        pnlProgressLayout.setHorizontalGroup(
+            pnlProgressLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlProgressLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(pnlProgressLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jLabel5)
+                    .addComponent(jLabel7)
+                    .addComponent(jLabel6))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(pnlProgressLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(pbJob, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(pbFolder, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(txtCurrentFolder))
+                .addContainerGap())
+        );
+        pnlProgressLayout.setVerticalGroup(
+            pnlProgressLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlProgressLayout.createSequentialGroup()
+                .addGroup(pnlProgressLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel5)
+                    .addComponent(txtCurrentFolder, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(pnlProgressLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel6)
+                    .addComponent(pbJob, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(pnlProgressLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel7)
+                    .addComponent(pbFolder, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap())
+        );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -182,16 +289,20 @@ public class RcpFrame extends javax.swing.JFrame {
                                     .addComponent(txtSrcFolder)
                                     .addComponent(txtProjectName))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(btnBrowseFolders)))))
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(btnBrowseFolders)
+                                    .addComponent(btnBrowseProjects)))
+                            .addComponent(pnlProgress, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel4)
-                    .addComponent(txtProjectName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
+                    .addComponent(btnBrowseProjects)
+                    .addComponent(txtProjectName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel4))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
                     .addComponent(btnBrowseFolders)
@@ -205,7 +316,9 @@ public class RcpFrame extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel3)
                     .addComponent(cboSystemPrinters, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(pnlProgress, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnCancel)
                     .addComponent(btnPrint)
@@ -230,12 +343,66 @@ public class RcpFrame extends javax.swing.JFrame {
                 PrintServiceLookup.lookupDefaultPrintService().getName());
     }
     
-    private void storeProjectNames() {
-        
+    private void storeProjectName() {
+        StartPrinting.PROPS.setProperty(txtProjectName.getText(), 
+                LocalDate.now().toString());
     }
     
-    private void readProjects() {
+    private void enableProgressControls() {
+        this.jLabel5.setEnabled(true);
+        this.jLabel6.setEnabled(true);
+        this.jLabel7.setEnabled(true);
+        this.pnlProgress.setEnabled(true);
+        this.pbFolder.setEnabled(true);
+        this.pbJob.setEnabled(true);
+        this.txtCurrentFolder.setEnabled(true);
+    }
+    
+    private void disableProgressControls() {
+        this.pbFolder.setValue(0);
+        this.pbJob.setValue(0);
+        this.jLabel5.setEnabled(false);
+        this.jLabel6.setEnabled(false);
+        this.jLabel7.setEnabled(false);
+        this.pnlProgress.setEnabled(false);
+        this.pbFolder.setEnabled(false);
+        this.pbJob.setEnabled(false);
+        this.txtCurrentFolder.setEnabled(false);
+    }
+    
+    private void countWalk(File file) {
+        if ( file.isDirectory() ) {
+            for ( File f : file.listFiles(extFilter) ) {
+                if ( f.isDirectory() ) {
+                    folders++;
+                    countWalk(f);
+                }
+                files++;
+            }
+            folders++;
+        }
+    }
+    
+    private boolean print(String pathToFiles, FileFilter filter) {
+        if ( pathToFiles == null ) {
+            throw new NullPointerException("The path cannot be null.");
+        }
         
+        boolean printed = false;
+        File file = new File(pathToFiles);
+        
+        for ( File f : file.listFiles(filter) ) {
+            if ( f.isDirectory() ) {
+                print(f.getAbsolutePath(), filter);
+                this.pbFolder.setValue(this.pbFolder.getValue() + 1);
+            } else {
+                FormattedPrinter printer = new FormattedPrinter(f.getAbsolutePath());
+
+                printer.actionPerformed(null);
+            }
+        }
+
+        return printed;
     }
     
     private void CancelAction(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_CancelAction
@@ -272,6 +439,59 @@ public class RcpFrame extends javax.swing.JFrame {
         about.setVisible(true);
     }//GEN-LAST:event_aboutClick
 
+    private void ProjectGotFocus(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_ProjectGotFocus
+        txtProjectName.selectAll();
+    }//GEN-LAST:event_ProjectGotFocus
+
+    private void ProjectLostFocus(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_ProjectLostFocus
+        txtProjectName.select(0, 0);
+        
+        storeProjectName();
+    }//GEN-LAST:event_ProjectLostFocus
+
+    private void ProjectClick(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ProjectClick
+        SelectProjectDialog project = new SelectProjectDialog(this, true);
+        project.setVisible(true);
+        
+        if ( project.selected == true ) {        
+            this.txtProjectName.setText(project.projectName);
+        }
+    }//GEN-LAST:event_ProjectClick
+
+    private void DoPrintJob(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_DoPrintJob
+        this.startTime = System.currentTimeMillis();
+        
+        enableProgressControls();
+        
+        countWalk(new File(this.txtSrcFolder.getText()));
+        
+        this.pbFolder.setMaximum(folders);
+        this.pbJob.setMaximum(files);
+        
+        String language = this.cboLanguage.getSelectedItem().toString();
+        int codeLoc = language.indexOf(":");
+        int codeStart = codeLoc + 2;
+        int codeEnd = language.indexOf(")");
+        String lang = this.cboLanguage.getSelectedItem().toString().substring(
+                codeStart, codeEnd);
+        FileFilter filter = FileFilterFactory.createFileFilter(lang);
+        
+        print(this.txtSrcFolder.getText(), filter);
+        
+        disableProgressControls();
+        
+        this.endTime = System.currentTimeMillis();
+        
+        StringBuilder sb = new StringBuilder();
+        sb.append("Processd:\n\t");
+        sb.append("Folders: ").append(folders).append("\n\t");
+        sb.append("Files: ").append(files).append("\n");
+        sb.append("Total Time: ").append((int)(endTime - startTime) / 1000);
+        
+        JOptionPane.showMessageDialog(this, sb.toString(), "Job Report", 
+                JOptionPane.INFORMATION_MESSAGE);
+    }//GEN-LAST:event_DoPrintJob
+
     /**
      * @param args the command line arguments
      */
@@ -282,17 +502,18 @@ public class RcpFrame extends javax.swing.JFrame {
          * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
          */
         try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+//            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+//                if ("Nimbus".equals(info.getName())) {
+//                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+//                    break;
+//                }
+//            }
         } catch (ClassNotFoundException | InstantiationException 
                 | IllegalAccessException 
                 | javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(RcpFrame.class.getName()).log(
-                    java.util.logging.Level.SEVERE, null, ex);
+            System.err.println(ex.getMessage());
+            ex.printStackTrace(System.err);
         }
         //</editor-fold>
         
@@ -307,6 +528,7 @@ public class RcpFrame extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAbout;
     private javax.swing.JButton btnBrowseFolders;
+    private javax.swing.JButton btnBrowseProjects;
     private javax.swing.JButton btnCancel;
     private javax.swing.JButton btnPrint;
     private javax.swing.JComboBox<String> cboLanguage;
@@ -315,7 +537,14 @@ public class RcpFrame extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel lblLastPrint;
+    private javax.swing.JProgressBar pbFolder;
+    private javax.swing.JProgressBar pbJob;
+    private javax.swing.JPanel pnlProgress;
+    private javax.swing.JTextField txtCurrentFolder;
     private javax.swing.JTextField txtProjectName;
     private javax.swing.JTextField txtSrcFolder;
     // End of variables declaration//GEN-END:variables
