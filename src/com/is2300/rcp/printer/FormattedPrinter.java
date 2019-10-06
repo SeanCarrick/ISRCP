@@ -34,6 +34,15 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
+import javax.print.DocFlavor;
+import javax.print.PrintException;
+import javax.print.PrintService;
+import javax.print.PrintServiceLookup;
+import javax.print.attribute.HashPrintRequestAttributeSet;
+import javax.print.attribute.PrintRequestAttributeSet;
+import javax.print.attribute.standard.Copies;
+import javax.print.attribute.standard.MediaSize;
+import javax.print.attribute.standard.Sides;
 
 /**
  *
@@ -132,12 +141,27 @@ public class FormattedPrinter implements Printable, ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
+//        DocFlavor docFmt = DocFlavor.STRING.TEXT_PLAIN;
+//        Doc printDoc = new SimpleDoc(file, docFmt, null);
+//        
+        PrintRequestAttributeSet attributes = new HashPrintRequestAttributeSet();
+        attributes.add(new Copies(1));
+//        attributes.add(MediaSize.NA.LETTER);
+        attributes.add(Sides.DUPLEX);
+//        
+//        PrintService[] services = PrintServiceLookup.lookupPrintServices(docFmt, attributes);
+//        DocPrintJob job = null;
+//        if ( services.length > 0 ) {
+//            job = services[0].createPrintJob();
+//        }
+        
         PrinterJob job = PrinterJob.getPrinterJob();
         job.setPrintable(this);
         boolean ok = job.printDialog();
         if ( ok ) {
             try {
-                job.print();
+//                job.setPrintService(services[0]);
+                job.print(attributes);
             } catch ( PrinterException ex ) {
                 System.err.println(ex);
                 ex.printStackTrace(System.err);

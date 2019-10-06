@@ -19,6 +19,20 @@ package com.is2300.rcp.printer;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import javax.print.Doc;
+import javax.print.DocFlavor;
+import javax.print.DocPrintJob;
+import javax.print.PrintException;
+import javax.print.PrintService;
+import javax.print.PrintServiceLookup;
+import javax.print.SimpleDoc;
+import javax.print.attribute.HashPrintRequestAttributeSet;
+import javax.print.attribute.PrintRequestAttributeSet;
+import javax.print.attribute.standard.Copies;
+import javax.print.attribute.standard.MediaSize;
+import javax.print.attribute.standard.Sides;
 
 /**
  * `PrintSetup` is the primary class for printing out project code files, or any
@@ -108,10 +122,34 @@ public class PrintSetup {
                 if ( f.isDirectory() ) {
                     print(f.getAbsolutePath(), filter);
                 } else {
-                    Printer printer = new Printer();
-                    printed = printer.print(f); //printFile(f);
-                    if ( printed ) {
-                        printCount++;
+                    FormattedPrinter printer = new FormattedPrinter(f.getAbsolutePath());
+                    
+                    DocFlavor docFmt = DocFlavor.INPUT_STREAM.AUTOSENSE;
+                    Doc prnDoc = null;
+                    try {
+                        prnDoc = new SimpleDoc(new FileInputStream(f), docFmt, null);
+                    } catch ( FileNotFoundException ex ) {
+                        System.err.println("File to print not found...");
+                    }
+                    if ( prnDoc == null ) {
+                        return false;
+                    }
+                    
+                    PrintRequestAttributeSet attributes = new HashPrintRequestAttributeSet();
+                    attributes.add(new Copies(1));
+                    attributes.add(MediaSize.NA.LETTER);
+                    attributes.add(Sides.DUPLEX);
+                    
+                    PrintService[] services = PrintServiceLookup.lookupPrintServices(docFmt, attributes);                    
+                    if ( services.length > 0 ) {
+                    DocPrintJob job = services[0].createPrintJob();
+                        try {
+                            job.print(prnDoc, attributes);
+                            printCount++;
+                        } catch ( PrintException ex ) {
+                            System.err.println(ex);
+                            ex.printStackTrace(System.err);
+                        }
                     }
                 }
             }

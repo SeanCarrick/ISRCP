@@ -21,6 +21,13 @@ import com.is2300.rcp.desktop.RcpFrame;
 import com.is2300.rcp.enums.SysExits;
 import com.is2300.rcp.printer.FileFilterFactory;
 import com.is2300.rcp.printer.PrintSetup;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -140,16 +147,17 @@ public class StartPrinting {
                 
         PROPS = new Properties();
         
-        /*File propsFile = new File(System.getProperty("user.home") 
+        File propsFile = new File(System.getProperty("user.home") 
                 + System.getProperty("file.separator") + ".isrcp.conf");
         try (InputStream is = new FileInputStream(propsFile)) {
             PROPS.load(is);
         } catch (FileNotFoundException ex) {
-            Logger.getLogger(StartPrinting.class.getName()).log(Level.SEVERE, null, ex);
+            // First time that the utility has been run, so we will just leave
+            //+ alone. The properties file will be saved when we exit.
         } catch (IOException ex) {
-            Logger.getLogger(StartPrinting.class.getName()).log(Level.SEVERE, null, ex);
+            System.err.println(ex.getMessage());
+            ex.printStackTrace(System.err);
         }
-        */
         
     }
 
@@ -157,65 +165,73 @@ public class StartPrinting {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
+        //<editor-fold defaultstate="collapsed" desc="Old Command Line Code">
         // Use CmdLineParser library to parse the arguments.
-        CmdLineParser parser = new CmdLineParser(args);
-        
-        Map<String, List<String>> testMap = parser.getSwitches();
-        
-        if ( parser.isSwitchPresent("-c") 
-                || parser.isSwitchPresent("--conditions") ) {
-            
-            showConditions();
-            
-        } else if ( (parser.isSwitchPresent("-d") 
-                || parser.isSwitchPresent("--dir")) 
-                && (parser.isSwitchPresent("-l") 
-                || parser.isSwitchPresent("--filter")) ) {
-            long start = System.currentTimeMillis();
-            
-            String[] langCodes = new String[]{"-l", "--lang"};
-            String[] dirKeys = new String[]{"-d", "--dir"};
-            
-            String langCode = parser.getKeyForValue(langCodes);
-            List<String> langs = parser.getValueList(langCode);
-            String lang = langs.get(0);
-            if ( lang.isBlank() ) {
-                throw new IllegalArgumentException("No switch provided for the "
-                        + "language to print.");
-            }
-            String dirKey = parser.getKeyForValue(dirKeys);
-            List<String> dirs = parser.getValueList(dirKey);
-            String dir = dirs.get(0);
-            PrintSetup.print(dir, FileFilterFactory.createFileFilter(lang));
-            
-            long finish = System.currentTimeMillis();
-            long totalTime = (finish - start) / 1000;
-            System.out.println("Number of files printed: " + 
-                    PrintSetup.getPrintCount() + " in " + totalTime + " seconds");
-            
-        } else if ( parser.isSwitchPresent("-h") 
-                || parser.isSwitchPresent("--help") ) {
-            
-            showHelp(SysExits.EX_OK);
-            
-        } else if ( parser.isSwitchPresent("-v") 
-                || parser.isSwitchPresent("--version") ) {
-            
-            showVersion();
-            
-        } else if ( parser.isSwitchPresent("-w") 
-                || parser.isSwitchPresent("--warranty") ) {
-            
-            showWarranty();
-            
-        } else if ( parser.isSwitchPresent("-g") 
-                || parser.isSwitchPresent("--gui") ) {
-            
-            RcpFrame.main(args);
-            
-        } else {
-            showHelp(SysExits.EX_USAGE);
-        }
+//        CmdLineParser parser = new CmdLineParser(args);
+//        
+//        Map<String, List<String>> testMap = parser.getSwitches();
+//        
+//        if ( parser.isSwitchPresent("-c") 
+//                || parser.isSwitchPresent("--conditions") ) {
+//            
+//            showConditions();
+//            
+//        } else if ( (parser.isSwitchPresent("-d") 
+//                || parser.isSwitchPresent("--dir")) 
+//                && (parser.isSwitchPresent("-l") 
+//                || parser.isSwitchPresent("--filter")) ) {
+//            long start = System.currentTimeMillis();
+//            
+//            String[] langCodes = new String[]{"-l", "--lang"};
+//            String[] dirKeys = new String[]{"-d", "--dir"};
+//            
+//            String langCode = parser.getKeyForValue(langCodes);
+//            List<String> langs = parser.getValueList(langCode);
+//            String lang = langs.get(0);
+//            if ( lang.isBlank() ) {
+//                throw new IllegalArgumentException("No switch provided for the "
+//                        + "language to print.");
+//            }
+//            String dirKey = parser.getKeyForValue(dirKeys);
+//            List<String> dirs = parser.getValueList(dirKey);
+//            String dir = dirs.get(0);
+//            PrintSetup.print(dir, FileFilterFactory.createFileFilter(lang));
+//            
+//            long finish = System.currentTimeMillis();
+//            long totalTime = (finish - start) / 1000;
+//            System.out.println("Number of files printed: " + 
+//                    PrintSetup.getPrintCount() + " in " + totalTime + " seconds");
+//            
+//        } else if ( parser.isSwitchPresent("-h") 
+//                || parser.isSwitchPresent("--help") ) {
+//            
+//            showHelp(SysExits.EX_OK);
+//            
+//        } else if ( parser.isSwitchPresent("-v") 
+//                || parser.isSwitchPresent("--version") ) {
+//            
+//            showVersion();
+//            
+//        } else if ( parser.isSwitchPresent("-w") 
+//                || parser.isSwitchPresent("--warranty") ) {
+//            
+//            showWarranty();
+//            
+//        } else if ( parser.isSwitchPresent("-g") 
+//                || parser.isSwitchPresent("--gui") ) {
+//            
+//            RcpFrame.main(args);
+//            
+//        } else {
+//            showHelp(SysExits.EX_USAGE);
+//        }
+//        </editor-fold>
+//        
+//        /*
+//         * We are just going to start the GUI for now. We'll figure out the
+//         * command-line stuff later.
+//         */
+        RcpFrame.main(args);
     }
     
     
