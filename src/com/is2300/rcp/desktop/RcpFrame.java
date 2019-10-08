@@ -18,29 +18,18 @@ package com.is2300.rcp.desktop;
 
 import com.is2300.rcp.StartPrinting;
 import com.is2300.rcp.enums.SysExits;
-import com.is2300.rcp.filters.FileFilterEx;
 import com.is2300.rcp.printer.FileFilterFactory;
 import com.is2300.rcp.printer.FormattedPrinter;
 import java.awt.Dimension;
 import java.awt.Toolkit;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileFilter;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.time.LocalDate;
-import static java.util.Locale.filter;
-import javax.print.Doc;
-import javax.print.DocFlavor;
-import javax.print.DocPrintJob;
-import javax.print.PrintException;
 import javax.print.PrintService;
 import javax.print.PrintServiceLookup;
-import javax.print.SimpleDoc;
-import javax.print.attribute.HashPrintRequestAttributeSet;
-import javax.print.attribute.PrintRequestAttributeSet;
-import javax.print.attribute.standard.Copies;
-import javax.print.attribute.standard.MediaSize;
-import javax.print.attribute.standard.Sides;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
@@ -65,6 +54,10 @@ public class RcpFrame extends javax.swing.JFrame {
     public RcpFrame() {
         initComponents();
         
+        this.setTitle("Integrity Solutions: Recursive Code Printer v. " 
+                + StartPrinting.MAJOR + "." + StartPrinting.MINOR + "."
+                + StartPrinting.BUILD);
+        
         Dimension scrSize = Toolkit.getDefaultToolkit().getScreenSize();
         int left = (scrSize.width - this.getWidth() ) / 2;
         int top = (scrSize.height - this.getHeight() ) / 2;
@@ -79,7 +72,8 @@ public class RcpFrame extends javax.swing.JFrame {
         }
         
         this.txtSrcFolder.setText(System.getProperty("user.home"));
-//        this.txtProjectName.setText("[Type or Select Project Name]");
+        this.txtProjectName.setText("[Type or Select Project Name]");
+        this.CanPrint(null);
     }
 
     /**
@@ -120,6 +114,12 @@ public class RcpFrame extends javax.swing.JFrame {
         jLabel1.setDisplayedMnemonic('F');
         jLabel1.setLabelFor(txtSrcFolder);
         jLabel1.setText("Top-Level Source Code Folder:");
+
+        txtSrcFolder.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                CanPrint(evt);
+            }
+        });
 
         btnBrowseFolders.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/is2300/rcp/desktop/Find.png"))); // NOI18N
         btnBrowseFolders.addActionListener(new java.awt.event.ActionListener() {
@@ -186,6 +186,7 @@ public class RcpFrame extends javax.swing.JFrame {
             }
             public void focusLost(java.awt.event.FocusEvent evt) {
                 ProjectLostFocus(evt);
+                CanPrint(evt);
             }
         });
 
@@ -344,8 +345,33 @@ public class RcpFrame extends javax.swing.JFrame {
     }
     
     private void storeProjectName() {
-        StartPrinting.PROPS.setProperty(txtProjectName.getText(), 
-                LocalDate.now().toString());
+        String projFileName = this.txtProjectName.getText().replace(" ", "_");
+        
+        File project = new File(StartPrinting.PROPS.getProperty("project.home")
+                + System.getProperty("file.separator") + projFileName);
+        
+        if ( !project.exists() ) {
+            try {
+                project.createNewFile();
+            } catch (IOException ex) {
+                String msg = ex.getMessage();
+                JOptionPane.showMessageDialog(this, msg, "Input/Ouput Exception", 
+                        JOptionPane.ERROR_MESSAGE);
+            }
+        }
+        
+        try (BufferedWriter out = new BufferedWriter(new FileWriter(project))) {
+            StringBuilder sb = new StringBuilder();
+            sb.append(LocalDate.now().toString()).append("\n");
+            sb.append(txtSrcFolder.getText()).append("\n");
+            sb.append(cboLanguage.getSelectedItem().toString());
+            
+            out.write(sb.toString());
+        } catch ( IOException ex ) {
+                String msg = ex.getMessage();
+                JOptionPane.showMessageDialog(this, msg, "Input/Ouput Exception", 
+                        JOptionPane.ERROR_MESSAGE);
+        }
     }
     
     private void enableProgressControls() {
@@ -394,18 +420,31 @@ public class RcpFrame extends javax.swing.JFrame {
         for ( File f : file.listFiles(filter) ) {
             if ( f.isDirectory() ) {
                 this.txtCurrentFolder.setText(f.getAbsolutePath());
-                /*print(f.getAbsolutePath(), filter);*/
+                print(f.getAbsolutePath(), filter);
                 System.out.println("Current Folder: " + f.getAbsolutePath());
                 this.pbFolder.setValue(this.pbFolder.getValue() + 1);
             } else {
                 FormattedPrinter printer = new FormattedPrinter(f.getAbsolutePath());
 
-                /*printer.actionPerformed(null);*/
+                printer.actionPerformed(null);
                 System.out.println("Current File: " + f.getName());
             }
         }
 
         return printed;
+    }
+    
+    private boolean isReady() {
+        boolean ready = false;
+        
+        if ( !this.txtProjectName.getText().isBlank()
+                && !this.txtSrcFolder.getText().isBlank()
+                && !this.cboLanguage.getSelectedItem().equals(
+                        "-- SELECT PROGRAMMING LANGUAGE --") ) {
+            ready = true;
+        }
+        
+        return ready;
     }
     
     private void CancelAction(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_CancelAction
@@ -430,7 +469,10 @@ public class RcpFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_findFolderClick
 
     private void languageSelectionChanged(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_languageSelectionChanged
-        // TODO add your handling code here:
+        if ( !cboLanguage.getSelectedItem().equals(
+                "-- SELECT PROGRAMMING LANGUAGE --") ) {
+            CanPrint(null);
+        }
     }//GEN-LAST:event_languageSelectionChanged
 
     private void printerSelectionChanged(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_printerSelectionChanged
@@ -449,7 +491,7 @@ public class RcpFrame extends javax.swing.JFrame {
     private void ProjectLostFocus(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_ProjectLostFocus
         txtProjectName.select(0, 0);
         
-        storeProjectName();
+        CanPrint(evt);
     }//GEN-LAST:event_ProjectLostFocus
 
     private void ProjectClick(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ProjectClick
@@ -459,9 +501,10 @@ public class RcpFrame extends javax.swing.JFrame {
         if ( project.selected == true ) {        
             this.txtProjectName.setText(project.projectName);
             this.txtSrcFolder.setText(project.getProjectPath(
-                    project.projectName));
+                    project.projectName.replace(" ", "_")));
             this.lblLastPrint.setText("Last Printed On: " 
-                    + StartPrinting.PROPS.getProperty(project.projectName));
+                    + StartPrinting.PROPS.getProperty(
+                            project.projectName.replace(" ", "_")));
             
             int count = cboLanguage.getItemCount();
             for ( int x = 0; x < count; x++ ) {
@@ -473,10 +516,14 @@ public class RcpFrame extends javax.swing.JFrame {
                 }
             }
         }
+        
+        CanPrint(null);
     }//GEN-LAST:event_ProjectClick
 
     private void DoPrintJob(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_DoPrintJob
         this.startTime = System.currentTimeMillis();
+        
+        storeProjectName();
         
         enableProgressControls();
         
@@ -508,6 +555,10 @@ public class RcpFrame extends javax.swing.JFrame {
         JOptionPane.showMessageDialog(this, sb.toString(), "Job Report", 
                 JOptionPane.INFORMATION_MESSAGE);
     }//GEN-LAST:event_DoPrintJob
+
+    private void CanPrint(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_CanPrint
+        this.btnPrint.setEnabled(this.isReady());
+    }//GEN-LAST:event_CanPrint
 
     /**
      * @param args the command line arguments

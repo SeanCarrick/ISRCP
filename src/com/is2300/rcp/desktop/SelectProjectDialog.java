@@ -72,13 +72,12 @@ public class SelectProjectDialog extends javax.swing.JDialog {
     
     private void loadProjects() {
         lstProjects.add("[Type or Select Project Name]");
-        File projectsDir = new File(System.getProperty("user.home") + 
-                System.getProperty("file.separator") + ".isrcp" + 
-                System.getProperty("file.separator") + "projects");
+        File projectsDir = new File(StartPrinting.PROPS.getProperty(
+                "project.home"));
         
         if ( projectsDir.listFiles().length > 0) {
             for ( File project : projectsDir.listFiles() ) {
-                lstProjects.add(project.getName());
+                lstProjects.add(project.getName().replace("_", " "));
                 
                 try (BufferedReader in = new BufferedReader(
                         new FileReader(project))) {

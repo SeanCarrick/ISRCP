@@ -131,6 +131,9 @@
       </Properties>
     </Component>
     <Component class="javax.swing.JTextField" name="txtSrcFolder">
+      <Events>
+        <EventHandler event="focusLost" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="CanPrint"/>
+      </Events>
     </Component>
     <Component class="javax.swing.JButton" name="btnBrowseFolders">
       <Properties>
@@ -279,7 +282,7 @@
     <Component class="javax.swing.JTextField" name="txtProjectName">
       <Events>
         <EventHandler event="focusGained" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="ProjectGotFocus"/>
-        <EventHandler event="focusLost" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="ProjectLostFocus"/>
+        <EventHandler event="focusLost" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="ProjectLostFocus,CanPrint"/>
       </Events>
     </Component>
     <Component class="javax.swing.JButton" name="btnBrowseProjects">

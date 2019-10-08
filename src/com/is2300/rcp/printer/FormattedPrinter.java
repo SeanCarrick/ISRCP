@@ -24,6 +24,7 @@ import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.print.PageFormat;
+import java.awt.print.Paper;
 import java.awt.print.Printable;
 import static java.awt.print.Printable.NO_SUCH_PAGE;
 import java.awt.print.PrinterException;
@@ -34,14 +35,10 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
-import javax.print.DocFlavor;
-import javax.print.PrintException;
-import javax.print.PrintService;
-import javax.print.PrintServiceLookup;
 import javax.print.attribute.HashPrintRequestAttributeSet;
 import javax.print.attribute.PrintRequestAttributeSet;
 import javax.print.attribute.standard.Copies;
-import javax.print.attribute.standard.MediaSize;
+import javax.print.attribute.standard.MediaPrintableArea;
 import javax.print.attribute.standard.Sides;
 
 /**
@@ -125,6 +122,10 @@ public class FormattedPrinter implements Printable, ActionListener {
         }
         
         Graphics2D g2d = (Graphics2D)graphics;
+        g2d.setFont(font);
+//        Paper paper = pageFormat.getPaper();
+//        paper.setImageableArea(0, 0, paper.getWidth(), paper.getHeight());
+//        pageFormat.setPaper(paper);
         g2d.translate(pageFormat.getImageableX(), pageFormat.getImageableY());
         
         int y   = 0;
@@ -148,6 +149,7 @@ public class FormattedPrinter implements Printable, ActionListener {
         attributes.add(new Copies(1));
 //        attributes.add(MediaSize.NA.LETTER);
         attributes.add(Sides.DUPLEX);
+//        attributes.add(new MediaPrintableArea(0f, 0f, w/72f, h/72f, MediaPrintableArea.INCH));
 //        
 //        PrintService[] services = PrintServiceLookup.lookupPrintServices(docFmt, attributes);
 //        DocPrintJob job = null;
