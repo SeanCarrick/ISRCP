@@ -16,22 +16,17 @@
  */
 package com.is2300.rcp;
 
-import com.is2300.cmdlineparser.CmdLineParser;
 import com.is2300.rcp.desktop.RcpFrame;
 import com.is2300.rcp.enums.SysExits;
-import com.is2300.rcp.printer.FileFilterFactory;
-import com.is2300.rcp.printer.PrintSetup;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.lang.System.Logger;
-import java.lang.System.Logger.Level;
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Map;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * ***Integrity Solutions*** *Recursive Code Printer Utility* is designed from 
@@ -147,9 +142,16 @@ public class StartPrinting {
                 
         PROPS = new Properties();
         
-        File appPath = new File(System.getProperty("user.home") + 
+        try (FileReader reader = new FileReader(System.getProperty("user.home")
+                + System.getProperty("file.separator") + "isrcp.conf")) {
+            PROPS.load(reader);
+        } catch (IOException ex) {
+            PROPS.setProperty("project.home", System.getProperty("user.home") + 
                 System.getProperty("file.separator") + ".isrcp" + 
                 System.getProperty("file.separator") + "projects");
+        }
+        
+        File appPath = new File(PROPS.getProperty("project.home"));
         
         if ( !appPath.exists() ) {
             appPath.mkdirs();
@@ -378,6 +380,16 @@ public class StartPrinting {
     public static void exit(SysExits status) {
         System.out.println("Thank you for using Integrity Solutions' Recursive "
                 + "Code Printer utility...\n");
+        
+        try {
+            PROPS.store(new FileOutputStream(new File(System.getProperty("user.home")
+                + System.getProperty("file.separator") + "isrcp.conf")),
+                    "Written during exit: " + LocalDate.now().toString());
+        } catch (IOException ex) {
+            System.err.println(ex.getMessage());
+            ex.printStackTrace(System.err);
+        }
+        
         System.exit(status.toInt());
     }
 
