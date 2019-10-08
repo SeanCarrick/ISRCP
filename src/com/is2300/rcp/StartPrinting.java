@@ -122,7 +122,11 @@ public class StartPrinting {
         MINOR = minor;
         
         MAJOR = BUILD / (MINOR * 100);
-        
+        /*
+        BUILD = 281;
+        MINOR = 23;
+        MAJOR = 0;
+        */
         StringBuilder sb = new StringBuilder();
         sb.append("Copyright (C) 2019 Integrity Solutions\n\n");
         sb.append("This program is free software: you can redistribute it and/or modify ");
