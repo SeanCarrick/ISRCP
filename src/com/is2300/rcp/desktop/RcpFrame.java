@@ -28,6 +28,7 @@ import java.io.FileFilter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDate;
+import javax.print.PrintException;
 import javax.print.PrintService;
 import javax.print.PrintServiceLookup;
 import javax.swing.JFileChooser;
@@ -424,11 +425,36 @@ public class RcpFrame extends javax.swing.JFrame {
                 System.out.println("Current Folder: " + f.getAbsolutePath());
                 this.pbFolder.setValue(this.pbFolder.getValue() + 1);
             } else {
-                FormattedPrinter printer = new FormattedPrinter(f.getAbsolutePath());
-
-                printer.actionPerformed(null);
+                
+                FormattedPrinter printer = new FormattedPrinter(
+                        f.getAbsolutePath());
+//                try {
+                    long lastModified = f.lastModified();
+                    lastModified /= 1000;   // Get to the seconds to...
+                    lastModified /= 60;     // get to the minutes to...
+                    lastModified /= 60;     // get to the hours to...
+                    lastModified /= 24;     // get to the days, since the epoch.
+                    LocalDate lastPrint = LocalDate.parse(
+                            StartPrinting.PROPS.getProperty(
+                                    this.txtProjectName.getText().replace(
+                                            " ", "_")));
+                    long lastPrinted = lastPrint.toEpochDay();
+                    if ( lastModified > lastPrinted ) {
+                        printer.actionPerformed(null);
+                    }
+//                } catch (PrintException | IOException ex) {
+//                    System.err.println(ex.getMessage());
+//                    ex.printStackTrace(System.err);
+//                }
                 System.out.println("Current File: " + f.getName());
             }
+        }
+        
+        if ( printed == false ) {
+            JOptionPane.showMessageDialog(this, 
+                    "No changes since last print date.", 
+                    "Doesn't Need Printed", 
+                    JOptionPane.INFORMATION_MESSAGE);
         }
 
         return printed;
@@ -450,7 +476,7 @@ public class RcpFrame extends javax.swing.JFrame {
     private void CancelAction(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_CancelAction
         this.setVisible(false);
         
-        StartPrinting.exit(SysExits.EX_OPCANCEL);
+        StartPrinting.exit(SysExits.EX_OK);
     }//GEN-LAST:event_CancelAction
 
     private void findFolderClick(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_findFolderClick
@@ -552,8 +578,8 @@ public class RcpFrame extends javax.swing.JFrame {
         sb.append("Files: ").append(files).append("\n");
         sb.append("Total Time: ").append((int)(endTime - startTime) / 1000);
         
-        JOptionPane.showMessageDialog(this, sb.toString(), "Job Report", 
-                JOptionPane.INFORMATION_MESSAGE);
+//        JOptionPane.showMessageDialog(this, sb.toString(), "Job Report", 
+//                JOptionPane.INFORMATION_MESSAGE);
     }//GEN-LAST:event_DoPrintJob
 
     private void CanPrint(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_CanPrint

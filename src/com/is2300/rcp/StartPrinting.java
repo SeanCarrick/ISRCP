@@ -19,14 +19,11 @@ package com.is2300.rcp;
 import com.is2300.rcp.desktop.RcpFrame;
 import com.is2300.rcp.enums.SysExits;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * ***Integrity Solutions*** *Recursive Code Printer Utility* is designed from 
@@ -233,6 +230,12 @@ public class StartPrinting {
 //         * We are just going to start the GUI for now. We'll figure out the
 //         * command-line stuff later.
 //         */
+        ////////////////////////////////////////////////////////////////////////
+        // DEBUGGING CODE: Remove before release build.                       //
+        ////////////////////////////////////////////////////////////////////////
+//        PrettyPrinter printer = new PrettyPrinter("/home/sean/tmp/test.txt", 70, 50);//
+        ////////////////////////////////////////////////////////////////////////
+        
         System.out.println(LocalDate.now().toString());
         RcpFrame.main(args);
     }
