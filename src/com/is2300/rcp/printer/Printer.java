@@ -30,8 +30,21 @@ import javax.print.PrintException;
 import javax.print.PrintService;
 import javax.print.PrintServiceLookup;
 import javax.print.SimpleDoc;
+import javax.print.attribute.DocAttributeSet;
+import javax.print.attribute.HashDocAttributeSet;
 import javax.print.attribute.HashPrintRequestAttributeSet;
 import javax.print.attribute.PrintRequestAttributeSet;
+import javax.print.attribute.standard.Chromaticity;
+import javax.print.attribute.standard.Copies;
+import javax.print.attribute.standard.DocumentName;
+import javax.print.attribute.standard.MediaName;
+import javax.print.attribute.standard.MediaPrintableArea;
+import javax.print.attribute.standard.MediaSizeName;
+import javax.print.attribute.standard.MediaTray;
+import javax.print.attribute.standard.OrientationRequested;
+import javax.print.attribute.standard.PrintQuality;
+import javax.print.attribute.standard.PrinterResolution;
+import javax.print.attribute.standard.Sides;
 
 /**
  *
@@ -72,14 +85,27 @@ public class Printer {
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Public Instance Methods">
-    public boolean print(File fileToPrint) {
+    public boolean print(File fileToPrint) throws PrintException, IOException {
         if ( fileToPrint == null ) {
             throw new IllegalArgumentException("No file to print was provided.");
         }
         boolean success = false;
+        attributes.add(new Copies(1));
+        attributes.add(Sides.DUPLEX);
+        attributes.add(OrientationRequested.PORTRAIT);
+        attributes.add(MediaTray.MAIN);
+//        attributes.add(MediaSize.NA.LETTER);
+        flavor = DocFlavor.INPUT_STREAM.AUTOSENSE;
         
         try ( FileInputStream in = new FileInputStream(fileToPrint) ) {
-            doc = new SimpleDoc(in, flavor, null);
+            DocAttributeSet set = new HashDocAttributeSet();
+            set.add(Chromaticity.MONOCHROME);
+            set.add(MediaName.NA_LETTER_WHITE);
+            set.add(MediaSizeName.NA_LETTER);
+            set.add(OrientationRequested.PORTRAIT);
+            set.add(PrintQuality.NORMAL);
+            set.add(Sides.DUPLEX);
+            doc = new SimpleDoc(in, flavor, set);
             PrintJobWatcher watcher = new PrintJobWatcher(job);
             job.print(doc, attributes);
             watcher.waitForDone();

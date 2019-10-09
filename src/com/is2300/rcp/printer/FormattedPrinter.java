@@ -17,6 +17,7 @@
 
 package com.is2300.rcp.printer;
 
+import com.is2300.rcp.utils.GeneralUtils;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
@@ -102,14 +103,18 @@ public class FormattedPrinter implements Printable, ActionListener {
     @Override
     public int print(Graphics graphics, PageFormat pageFormat, int pageIndex) 
             throws PrinterException {
+        // Line Continuation character:  "\n\u23CE" = ⏎
         Font font = new Font("Courier", Font.PLAIN, 10);
         FontMetrics metrics = graphics.getFontMetrics(font);
         int lineHeight = metrics.getHeight();
+        int[] charWidth = metrics.getWidths();
+        int avgWidth = GeneralUtils.average(charWidth);
         
         if ( pageBreaks == null ) {
             // initTextLines();
             int linesPerPage = (int)(pageFormat.getImageableHeight()/lineHeight);
             int numBreaks = (lines.length - 1) / linesPerPage;
+            int charsPerPage = (int)(pageFormat.getImageableWidth() / avgWidth);
             pageBreaks = new int[numBreaks];
             
             for ( int b = 0; b < numBreaks; b++ ) {
