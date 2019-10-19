@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.is2300.rcp.printer;
+package com.pekinsoft.rcp.printer;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;

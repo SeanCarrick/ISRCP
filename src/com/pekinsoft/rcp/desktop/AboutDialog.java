@@ -14,9 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.is2300.rcp.desktop;
+package com.pekinsoft.rcp.desktop;
 
-import com.is2300.rcp.StartPrinting;
+import com.pekinsoft.rcp.StartPrinting;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 
@@ -66,7 +66,7 @@ public class AboutDialog extends javax.swing.JDialog {
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("About Recursive Code Printer Utility");
 
-        lblLogo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/is2300/rcp/desktop/Code.Printer.png"))); // NOI18N
+        lblLogo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/pekinsoft/rcp/desktop/Code.Printer.png"))); // NOI18N
 
         lblVendor.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         lblVendor.setText("<html><h1>Integrity Solutions</h1></html>");
@@ -84,7 +84,7 @@ public class AboutDialog extends javax.swing.JDialog {
         txtWarranty.setWrapStyleWord(true);
         jScrollPane1.setViewportView(txtWarranty);
 
-        btnClose.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/is2300/rcp/desktop/close.png"))); // NOI18N
+        btnClose.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/pekinsoft/rcp/desktop/close.png"))); // NOI18N
         btnClose.setMnemonic('C');
         btnClose.setText("Close");
         btnClose.addActionListener(new java.awt.event.ActionListener() {

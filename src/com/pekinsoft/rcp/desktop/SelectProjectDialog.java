@@ -14,9 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.is2300.rcp.desktop;
+package com.pekinsoft.rcp.desktop;
 
-import com.is2300.rcp.StartPrinting;
+import com.pekinsoft.rcp.StartPrinting;
 import java.awt.Dimension;
 import java.awt.List;
 import java.awt.Toolkit;
@@ -118,7 +118,7 @@ public class SelectProjectDialog extends javax.swing.JDialog {
 
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
-        btnCancel.setIcon(new ImageIcon(getClass().getResource("/com/is2300/rcp/desktop/Cancel.png"))); // NOI18N
+        btnCancel.setIcon(new ImageIcon(getClass().getResource("/com/pekinsoft/rcp/desktop/Cancel.png"))); // NOI18N
         btnCancel.setText("Cancel");
         btnCancel.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
@@ -126,7 +126,7 @@ public class SelectProjectDialog extends javax.swing.JDialog {
             }
         });
 
-        btnSelect.setIcon(new ImageIcon(getClass().getResource("/com/is2300/rcp/desktop/apply.png"))); // NOI18N
+        btnSelect.setIcon(new ImageIcon(getClass().getResource("/com/pekinsoft/rcp/desktop/apply.png"))); // NOI18N
         btnSelect.setText("Select");
         btnSelect.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {

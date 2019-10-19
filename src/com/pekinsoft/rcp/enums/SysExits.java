@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.is2300.rcp.enums;
+package com.pekinsoft.rcp.enums;
 
 /**
  * Integrity Solutions System Exit Codes.  The following enumerations are used

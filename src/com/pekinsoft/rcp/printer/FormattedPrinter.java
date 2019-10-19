@@ -15,9 +15,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.is2300.rcp.printer;
+package com.pekinsoft.rcp.printer;
 
-import com.is2300.rcp.utils.GeneralUtils;
+import com.pekinsoft.rcp.utils.GeneralUtils;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;

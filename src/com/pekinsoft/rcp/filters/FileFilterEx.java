@@ -15,7 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.is2300.rcp.utils;
+package com.pekinsoft.rcp.filters;
+
+import java.io.File;
+import java.io.FileFilter;
 
 /**
  *
@@ -24,13 +27,13 @@ package com.is2300.rcp.utils;
  * @version 0.1.0
  * @since 0.1.0
  */
-public class GeneralUtils {
+public class FileFilterEx implements FileFilter {
     //<editor-fold defaultstate="collapsed" desc="Public Static Constants">
     
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Private Member Fields">
-    
+    private final String[] extensions;    
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Static Initializer">
@@ -46,27 +49,34 @@ public class GeneralUtils {
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Constructor(s)">
-    public GeneralUtils () {
-        
+    public FileFilterEx (String[] extensions) {
+        this.extensions = extensions;
     }
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Public Static Methods">
-    public static int average(int[] vals) {
-        int avg = 0;
-        int total = 0;
-        
-        for ( int val : vals ) {
-            total += val;
-        }
-        
-        avg = total / vals.length;
-        
-        return avg;
-    }
+    
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Public Instance Methods">
+    /**
+     * Tests whether or not the specified abstract path name should be included
+     * in a pathname list.
+     * 
+     * @param file The abstract pathname to be tested
+     * @return boolean `true` if and only if the pathname should be included
+     */
+    @Override
+    public boolean accept(File file) {
+        for ( String extension : extensions ) {
+            if ( file.getName().toLowerCase().endsWith(extension) 
+                    || file.isDirectory() ) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
     
     //</editor-fold>
 

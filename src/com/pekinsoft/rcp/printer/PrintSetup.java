@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.is2300.rcp.printer;
+package com.pekinsoft.rcp.printer;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -54,8 +54,8 @@ import javax.print.attribute.standard.Sides;
  * 
  * @author Sean Carrick &lt;sean at carricktrucking dot com&gt;
  * 
- * @version 0.1.0
- * @since 0.23.384
+ * @version 0.23.384
+ * @since 0.1.0
  */
 public class PrintSetup {
     //<editor-fold defaultstate="collapsed" desc="Public Static Constants">

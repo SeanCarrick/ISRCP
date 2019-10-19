@@ -14,10 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.is2300.rcp;
+package com.pekinsoft.rcp;
 
-import com.is2300.rcp.desktop.RcpFrame;
-import com.is2300.rcp.enums.SysExits;
+import com.pekinsoft.rcp.desktop.RcpFrame;
+import com.pekinsoft.rcp.enums.SysExits;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
@@ -25,8 +25,8 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Properties;
 
-/**
- * ***Integrity Solutions*** *Recursive Code Printer Utility* is designed from 
+/**\mainpage Integrity Solutions Recursive Code Printer Utility 
+ * The RCP is designed from 
  * the ground up to be a useful tool for developers who desire to generate a
  * hard-copy of their project's source code for copyright purposes. Integrity
  * Solutions deemed it necessary to create this utility to provide a less painful

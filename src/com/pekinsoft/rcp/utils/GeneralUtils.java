@@ -15,11 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.is2300.rcp.printer;
-
-import javax.print.DocPrintJob;
-import javax.print.event.PrintJobAdapter;
-import javax.print.event.PrintJobEvent;
+package com.pekinsoft.rcp.utils;
 
 /**
  *
@@ -28,13 +24,13 @@ import javax.print.event.PrintJobEvent;
  * @version 0.1.0
  * @since 0.1.0
  */
-public class PrintJobWatcher {
+public class GeneralUtils {
     //<editor-fold defaultstate="collapsed" desc="Public Static Constants">
     
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Private Member Fields">
-    boolean done;
+    
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Static Initializer">
@@ -45,51 +41,33 @@ public class PrintJobWatcher {
 
     //<editor-fold defaultstate="collapsed" desc="Intstance Initializer">
     {
-        done = false;
+        
     }
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Constructor(s)">
-    public PrintJobWatcher (DocPrintJob job) {
-        if ( job == null ) {
-            throw new IllegalArgumentException("No job to watch was provided.");
-        }
+    public GeneralUtils () {
         
-        job.addPrintJobListener(new PrintJobAdapter() {
-            public void printJobCanceled(PrintJobEvent e) {
-                allDone();
-            }
-            public void printJobCompleted(PrintJobEvent e) {
-                allDone();
-            }
-            public void printJobNoMoreEvents(PrintJobEvent e) {
-                allDone();
-            }
-            void allDone() {
-                synchronized (PrintJobWatcher.this) {
-                    done = true;
-                    System.out.println("Printing done...");
-                    PrintJobWatcher.this.notify();
-                }
-            }
-        });
     }
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Public Static Methods">
-    
+    public static int average(int[] vals) {
+        int avg = 0;
+        int total = 0;
+        
+        for ( int val : vals ) {
+            total += val;
+        }
+        
+        avg = total / vals.length;
+        
+        return avg;
+    }
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Public Instance Methods">
-    public synchronized void waitForDone() {
-        try {
-            while (!done) {
-                wait();
-            }
-        } catch (InterruptedException e) {
-            System.err.println("Job interupted...");
-        }
-    }
+    
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Private Instance Methods">

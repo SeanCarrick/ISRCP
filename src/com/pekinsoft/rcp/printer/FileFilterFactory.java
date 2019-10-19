@@ -15,10 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.is2300.rcp.printer;
+package com.pekinsoft.rcp.printer;
 
-import com.is2300.rcp.StartPrinting;
-import com.is2300.rcp.filters.FileFilterEx;
+import com.pekinsoft.rcp.StartPrinting;
+import com.pekinsoft.rcp.filters.FileFilterEx;
 import java.io.FileFilter;
 import java.util.HashMap;
 import java.util.Map;

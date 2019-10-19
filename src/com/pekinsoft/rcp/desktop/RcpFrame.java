@@ -14,12 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.is2300.rcp.desktop;
+package com.pekinsoft.rcp.desktop;
 
-import com.is2300.rcp.StartPrinting;
-import com.is2300.rcp.enums.SysExits;
-import com.is2300.rcp.printer.FileFilterFactory;
-import com.is2300.rcp.printer.FormattedPrinter;
+import com.pekinsoft.rcp.StartPrinting;
+import com.pekinsoft.rcp.enums.SysExits;
+import com.pekinsoft.rcp.printer.FileFilterFactory;
+import com.pekinsoft.rcp.printer.FormattedPrinter;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.io.BufferedWriter;
@@ -122,7 +122,7 @@ public class RcpFrame extends javax.swing.JFrame {
             }
         });
 
-        btnBrowseFolders.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/is2300/rcp/desktop/Find.png"))); // NOI18N
+        btnBrowseFolders.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/pekinsoft/rcp/desktop/Find.png"))); // NOI18N
         btnBrowseFolders.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 findFolderClick(evt);
@@ -140,7 +140,7 @@ public class RcpFrame extends javax.swing.JFrame {
             }
         });
 
-        btnCancel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/is2300/rcp/desktop/close.png"))); // NOI18N
+        btnCancel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/pekinsoft/rcp/desktop/close.png"))); // NOI18N
         btnCancel.setMnemonic('C');
         btnCancel.setText("Close");
         btnCancel.addActionListener(new java.awt.event.ActionListener() {
@@ -149,7 +149,7 @@ public class RcpFrame extends javax.swing.JFrame {
             }
         });
 
-        btnPrint.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/is2300/rcp/desktop/Print.png"))); // NOI18N
+        btnPrint.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/pekinsoft/rcp/desktop/Print.png"))); // NOI18N
         btnPrint.setMnemonic('P');
         btnPrint.setText("Print Project");
         btnPrint.addActionListener(new java.awt.event.ActionListener() {
@@ -169,7 +169,7 @@ public class RcpFrame extends javax.swing.JFrame {
             }
         });
 
-        btnAbout.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/is2300/rcp/desktop/About.png"))); // NOI18N
+        btnAbout.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/pekinsoft/rcp/desktop/About.png"))); // NOI18N
         btnAbout.setText("About");
         btnAbout.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -191,7 +191,7 @@ public class RcpFrame extends javax.swing.JFrame {
             }
         });
 
-        btnBrowseProjects.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/is2300/rcp/desktop/Project.png"))); // NOI18N
+        btnBrowseProjects.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/pekinsoft/rcp/desktop/Project.png"))); // NOI18N
         btnBrowseProjects.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 ProjectClick(evt);

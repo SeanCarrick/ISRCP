@@ -15,10 +15,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.is2300.rcp.filters;
+package com.pekinsoft.rcp.printer;
 
-import java.io.File;
-import java.io.FileFilter;
+import javax.print.DocPrintJob;
+import javax.print.event.PrintJobAdapter;
+import javax.print.event.PrintJobEvent;
 
 /**
  *
@@ -27,13 +28,13 @@ import java.io.FileFilter;
  * @version 0.1.0
  * @since 0.1.0
  */
-public class FileFilterEx implements FileFilter {
+public class PrintJobWatcher {
     //<editor-fold defaultstate="collapsed" desc="Public Static Constants">
     
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Private Member Fields">
-    private final String[] extensions;    
+    boolean done;
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Static Initializer">
@@ -44,13 +45,34 @@ public class FileFilterEx implements FileFilter {
 
     //<editor-fold defaultstate="collapsed" desc="Intstance Initializer">
     {
-        
+        done = false;
     }
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Constructor(s)">
-    public FileFilterEx (String[] extensions) {
-        this.extensions = extensions;
+    public PrintJobWatcher (DocPrintJob job) {
+        if ( job == null ) {
+            throw new IllegalArgumentException("No job to watch was provided.");
+        }
+        
+        job.addPrintJobListener(new PrintJobAdapter() {
+            public void printJobCanceled(PrintJobEvent e) {
+                allDone();
+            }
+            public void printJobCompleted(PrintJobEvent e) {
+                allDone();
+            }
+            public void printJobNoMoreEvents(PrintJobEvent e) {
+                allDone();
+            }
+            void allDone() {
+                synchronized (PrintJobWatcher.this) {
+                    done = true;
+                    System.out.println("Printing done...");
+                    PrintJobWatcher.this.notify();
+                }
+            }
+        });
     }
     //</editor-fold>
 
@@ -59,25 +81,15 @@ public class FileFilterEx implements FileFilter {
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Public Instance Methods">
-    /**
-     * Tests whether or not the specified abstract path name should be included
-     * in a pathname list.
-     * 
-     * @param file The abstract pathname to be tested
-     * @return boolean `true` if and only if the pathname should be included
-     */
-    @Override
-    public boolean accept(File file) {
-        for ( String extension : extensions ) {
-            if ( file.getName().toLowerCase().endsWith(extension) 
-                    || file.isDirectory() ) {
-                return true;
+    public synchronized void waitForDone() {
+        try {
+            while (!done) {
+                wait();
             }
+        } catch (InterruptedException e) {
+            System.err.println("Job interupted...");
         }
-        
-        return false;
     }
-    
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Private Instance Methods">
